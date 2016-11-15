@@ -1,0 +1,21 @@
+#!/bin/bash
+
+readme="README.txt"
+files="FONTLOG.txt OFL-FAQ.txt OFL.txt"
+
+unix2dos -n README.md $readme
+
+for file in $files
+do
+    unix2dos $file
+done
+
+smith zip
+
+for file in $files
+do
+    dos2unix $file
+done
+
+echo "rm: removing file $readme ..."
+rm $readme
