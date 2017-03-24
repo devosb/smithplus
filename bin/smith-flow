@@ -1,27 +1,3 @@
 #!/bin/bash
 
-smith-zip()
-{
-    files="README.txt FONTLOG.txt OFL-FAQ.txt OFL.txt"
-
-    for file in $files
-    do
-        unix2dos $file
-    done
-
-    smith zip $FLOWARGS
-
-    for file in $files
-    do
-        dos2unix $file
-    done
-}
-
-case "$1" in
-    zip)
-        smith-zip
-        ;;
-    *)
-        smith "$1" $FLOWARGS
-        ;;
-esac
+smith "$1" $FLOWARGS
