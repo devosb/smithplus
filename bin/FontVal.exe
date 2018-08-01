@@ -1,0 +1,3 @@
+#!/bin/sh
+
+mono $HOME/builds/fontvalidator/bin/FontVal.exe "$@"

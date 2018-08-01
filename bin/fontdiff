@@ -1,0 +1,6 @@
+#!/bin/bash
+
+html="$3"
+text=${html%.html}
+out=${text}.pdf
+$HOME/builds/fontdiff/build/out/Default/fontdiff --before "$1" --after "$2" --specimen "$3" --out "$out"
