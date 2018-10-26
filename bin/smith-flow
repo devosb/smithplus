@@ -1,3 +1,9 @@
 #!/bin/bash
 
-$HOME/.local/bin/smith "$@" $FLOWARGS
+if [ "$1" == "install" ]
+then
+    cp -p -v results/*.ttf ~/.fonts
+    cp -p -v results/woff/*.woff web
+else
+    $HOME/.local/bin/smith "$@" $FLOWARGS
+fi
