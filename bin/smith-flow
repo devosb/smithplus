@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export SILE_PATH=/mnt/builds/fontproof
+
 if [ "$1" == "install" ]
 then
     cp -p -v results/*.ttf ~/.fonts
