@@ -1,0 +1,5 @@
+#!/bin/bash
+
+prj=$(basename $PWD)
+echo "now running ../rrun-$prj"
+../rrun-$prj

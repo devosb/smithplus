@@ -1,0 +1,13 @@
+#!/bin/bash
+
+text=$1
+
+location=results/tests/xtest
+mkdir -p $location
+
+for renderer in ot graphite2
+do
+    hb-shape -v --shaper $renderer -o $location/text.$renderer.txt --font-file results/*-Regular.ttf --text-file $text
+done
+
+meld $location/text.*.txt
