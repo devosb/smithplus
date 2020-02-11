@@ -1,5 +1,3 @@
 #!/bin/bash
-export FONTBAKERY_GIT_REPO=$HOME/builds/fontbakery
-export PATH=$FONTBAKERY_GIT_REPO/prebuilt/fval:$PATH
-export LD_PRELOAD=$FONTBAKERY_GIT_REPO/prebuilt/custom_freetype/libfreetype.so
-fontbakery-check-googlefonts.py "$1"
+pip3 install fontbakery
+fontbakery check-profile tools/fbchecks.py results/*.ttf --html results/fbchecks.html
