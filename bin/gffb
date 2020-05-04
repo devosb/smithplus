@@ -1,3 +1,2 @@
 #!/bin/bash
-pip3 install fontbakery
-fontbakery check-profile tools/fbchecks.py results/*.ttf --html results/fbchecks.html
+psfrunfbchecks --html results/fbchecks.html results/*.ttf
