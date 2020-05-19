@@ -1,2 +1,18 @@
 #!/bin/bash
-psfrunfbchecks --html results/fbchecks.html results/*.ttf
+pushd results
+
+# find font families
+declare -A families
+for ttf in *.ttf
+do
+    family=$(echo $ttf | cut -d- -f 1)
+    families[$family]=$family
+done
+
+# report on each set of font families (often there is only one family)
+for family in ${families[*]}
+do
+    psfrunfbchecks --html $family-fbchecks.html --log $family-runfbchecks.log $family-*.ttf
+done
+
+popd
