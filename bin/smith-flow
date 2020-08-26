@@ -2,9 +2,20 @@
 
 export SILE_PATH=/mnt/builds/fontproof
 
+if [ $HOSTNAME = fossa ]
+then
+    prj=$(basename $PWD)
+    rrun=../rrun-$prj
+    if [ ! -x $rrun ]
+    then
+        echo "You are in $PWD which is not on the ramdisk, exiting..."
+        exit 1
+    fi
+fi
+
 if [ "$1" == "install" ]
 then
-    cp -p -v results/*.ttf ~/local/guest
+    cp -p -v results/*.ttf ~/guest
     cp -p -v results/*.ttf ~/.fonts
     for www in web woff
     do
@@ -13,7 +24,7 @@ then
             cp -p -v results/$www/*.woff web
         fi
     done
-    cp -a -v web/* ~/local/guest
+    cp -a -v web/* ~/guest
 else
     $HOME/.local/bin/smith "$@" $FLOWARGS
 fi
