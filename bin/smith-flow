@@ -4,12 +4,35 @@ export SILE_PATH=/mnt/builds/fontproof
 
 if [ $HOSTNAME = fossa ]
 then
-    prj=$(basename $PWD)
-    rrun=../rrun-$prj
-    if [ ! -x $rrun ]
+    if [ -f wscript ]
     then
-        echo "You are in $PWD which is not on the ramdisk, exiting..."
-        exit 1
+        prj=$(basename $PWD)
+        rrun=../rrun-$prj
+        if [ ! -x $rrun ]
+        then
+            echo "You are in $PWD which is not on the ramdisk, exiting..."
+            exit 1
+        fi
+    fi
+fi
+
+if [ "$1" == "bisect" ]
+then
+    prj="$2"
+    if [ -d "$prj" ]
+    then
+        pushd $prj
+        smith distclean
+        smith configure
+        smith build
+        if [ ! -f results/*-Regular.ttf ]
+        then
+            echo "broken build"
+            exit 1
+        fi
+        echo "successful build"
+        exit 0
+        popd
     fi
 fi
 
@@ -24,7 +47,11 @@ then
             cp -p -v results/$www/*.woff web
         fi
     done
-    cp -a -v web/* ~/guest
+    prj=$(basename $PWD)
+    web=$HOME/guest/$prj-web
+    rm -rf $web
+    mkdir $web
+    cp -a -v web/* $web
 else
     $HOME/.local/bin/smith "$@" $FLOWARGS
 fi
