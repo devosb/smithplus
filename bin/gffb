@@ -10,9 +10,16 @@ do
 done
 
 # report on each set of font families (often there is only one family)
+profile_settings="../tools/fbttfchecks.py"
+profile_option=""
+
 for family in ${families[*]}
 do
-    psfrunfbchecks --html $family-fbchecks.html --log $family-runfbchecks.log $family-*.ttf
+    if [ -f $profile_settings ]
+    then
+        profile_option="--profile $profile_settings"
+    fi
+    psfrunfbchecks $profile_option --html $family-fbchecks.html --log $family-runfbchecks.log $family-*.ttf
 done
 
 popd
