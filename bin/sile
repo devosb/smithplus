@@ -1,4 +1,0 @@
-#!/bin/bash
-
-export SILE_PATH=$HOME/builds/fontproof
-/usr/local/bin/sile "$@"
