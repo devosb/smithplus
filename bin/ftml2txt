@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from xml.etree.ElementTree import ElementTree
+import unikey
 import os.path
 import argparse
 
@@ -19,7 +20,7 @@ def extract_text(args):
     for ftml_filename in args.file:
         # Construct output filename
         (text_filename, ext) = os.path.splitext(ftml_filename)
-        text_filename += '.txt'
+        text_filename = 'generated-' + text_filename + '.txt'
 
         # Read FTML file
         ftml = ElementTree()
@@ -28,11 +29,12 @@ def extract_text(args):
         # Extract text from FTML file to text file
         with open(text_filename, 'w') as text_file:
             for testgroup in ftml.iter('testgroup'):
-                text_file.write('# ' + testgroup.get('label') + '\n')
+                text_file.write('\# ' + testgroup.get('label') + '\n')
                 for test in testgroup.iter('test'):
-                    text_file.write(test.get('label') + '\n')
-                    for string in test.iter('string'):
-                        text_file.write(string.text + '\n')
+                    text_file.write(test.get('label') + ' ')
+                    for literal_string in test.iter('string'):
+                        actual_string = unikey.modify(literal_string.text)
+                        text_file.write(actual_string + '\n')
 
 
 if __name__ == "__main__":
