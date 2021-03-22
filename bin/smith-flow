@@ -44,7 +44,7 @@ then
     do
         if [ -d results/$www ]
         then
-            cp -p -v results/$www/*.woff web
+            cp -p -v results/$www/*.woff* web
         fi
     done
     prj=$(basename $PWD)

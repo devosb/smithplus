@@ -20,7 +20,7 @@ def extract_text(args):
     for ftml_filename in args.file:
         # Construct output filename
         (text_filename, ext) = os.path.splitext(ftml_filename)
-        text_filename = 'generated-' + text_filename + '.txt'
+        text_filename = f'generated/{text_filename}-ftml.txt'
 
         # Read FTML file
         ftml = ElementTree()
