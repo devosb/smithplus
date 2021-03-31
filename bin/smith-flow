@@ -52,6 +52,143 @@ then
     rm -rf $web
     mkdir $web
     cp -a -v web/* $web
-else
-    $HOME/.local/bin/smith "$@" $FLOWARGS
+
+    exit 0
 fi
+
+if [ "$1" == "windows" ]
+then
+    pushd tests
+
+    # windows apps
+    /bin/cp -p -v *.indd *.docx ~/guest
+
+    # plain text
+    if [ -d generated ]
+    then
+        pushd generated
+        for txt in *.txt
+        do
+            unix2dos -n $txt ~/guest/$txt
+        done
+        popd
+    fi
+
+    # ftml
+    psfcheckftml
+    for ftml in *.ftml
+    do
+        # check for valid files
+        xmllint --noout --dtdvalid $HOME/builds/ftml/FTML.dtd $ftml
+        if [ $? -gt 0 ]
+        then
+            echo "ftml file $ftml is invalid"
+        fi
+
+        # produce docuemnt
+        base=$(basename $ftml .ftml)
+        ftml2odt ${base}
+        /bin/mv -v ${base}.odt ~/guest
+    done
+    popd
+
+    # fonts
+    /bin/cp -p -v results/*.ttf ~/guest
+
+    exit 0
+fi
+
+if [ "$1" == "data" ]
+then
+    for auto in tools/auto-*
+    do
+        ./$auto tests/$(basename $auto .py).txt
+    done
+
+    pushd tests
+    /bin/rm -rf generated
+    mkdir generated
+    for htxt in *.htxt
+    do
+        if [ -f $htxt ]
+        then
+            unikey -o generated/${htxt%.htxt}-plain.txt $htxt
+        fi
+    done
+
+    for ftml in *.ftml
+    do
+        if [ -f $ftml ]
+        then
+            ftml2txt $ftml
+        fi
+    done
+
+    pushd generated
+    for txt in *.txt
+    do
+        for nf in nfc nfd
+        do
+            txtconv -i $txt -o ${txt%.txt}-$nf.txt -$nf -nobom
+        done
+    done
+    popd
+    popd
+
+    exit 0
+fi
+
+if [ "$1" == "wordlists" ]
+then
+    cd tests
+    if [ -f wiki.txt ]
+    then
+        mv wiki.txt wiki.text
+        mv dict.txt dict.text
+        echo "large wordlists disabled"
+    else
+        mv wiki.text wiki.txt
+        mv dict.text dict.txt
+        echo "large wordlists enabled"
+    fi
+    cd ..
+
+    exit 0
+fi
+
+if [ "$1" == "update" ]
+then
+    gdcsv
+
+    if [ -d documentation ]
+    then
+        pushd documentation
+        for odt in *.odt
+        do
+            pdf=$(basename $odt .odt).pdf
+            if [ $odt -nt $pdf ]
+            then
+                soffice --convert-to pdf $odt
+            fi
+        done
+        popd
+    fi
+
+    for ufo in source/*.ufo source/masters/*.ufo
+    do
+        if [ -d $ufo ]
+        then
+            if [ OFL.txt -nt $ufo/fontinfo.plist ]
+            then
+                psfsetkeys -k "copyright" --filepart OFL.txt $ufo
+                psfsetkeys -k "openTypeNameLicense" --file OFL.txt $ufo
+            fi
+        fi
+    done
+
+    /bin/rm -rf {source,tests}/{'',masters}/{backups,logs}
+
+    exit 0
+fi
+
+$HOME/.local/bin/smith "$@" $FLOWARGS
