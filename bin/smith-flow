@@ -1,6 +1,10 @@
 #!/bin/bash
 
 export SILE_PATH=/mnt/builds/fontproof
+if [ -f .smithrc ]
+then
+    source .smithrc
+fi
 
 if [ $HOSTNAME = fossa ]
 then
