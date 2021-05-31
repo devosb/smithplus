@@ -40,6 +40,47 @@ then
     fi
 fi
 
+if [ "$1" == "make" ]
+then
+    if [ -d source/masters ]
+    then
+        for dspace in source/*Design.designspace
+        do
+            if [ -f $dspace ]
+            then
+                echo "building instance fonts from $dspace"
+                fontmake -m $dspace --keep-overlaps -i -o otf ttf
+                variable=$dspace
+            fi
+        done
+
+        for dspace in source/*Variable.designspace
+        do
+            if [ -f $dspace ]
+            then
+                variable=$dspace
+            fi
+        done
+
+        if [ -f $variable ]
+        then
+            echo "building variable font from $variable"
+            fontmake -m $variable -o variable
+        fi
+    else
+        for dspace in source/*.designspace
+        do
+            if [ -f $dspace ]
+            then
+                echo "building static fonts from $dspace"
+                fontmake -m $dspace -o otf ttf
+            fi
+        done
+    fi
+
+    exit 0
+fi
+
 if [ "$1" == "install" ]
 then
     cp -p -v results/*.ttf ~/guest
