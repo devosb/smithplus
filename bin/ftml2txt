@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from xml.etree.ElementTree import ElementTree
-import unikey
+from thefoxUtils import unikey
 import os.path
 import argparse
 
