@@ -158,11 +158,19 @@ then
     pushd tests
     /bin/rm -rf generated
     mkdir generated
-    for htxt in *.*txt
+    for htxt in *.htxt
     do
         if [ -f $htxt ]
         then
             unikey -o generated/${htxt%.htxt}-plain.txt $htxt
+        fi
+    done
+
+    for txt in *.txt
+    do
+        if [ -f $txt ]
+        then
+            cp $txt generated
         fi
     done
 
