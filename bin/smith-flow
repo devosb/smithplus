@@ -87,11 +87,6 @@ then
     /bin/cp -p -v results/*.ttf ~/guest
     rsync -a -v *_* ~/guest
 
-    exit 0
-fi
-
-if [ "$1" == "windows" ]
-then
     for www in web woff
     do
         if [ -d results/$www ]
@@ -99,6 +94,12 @@ then
             cp -p -v results/$www/*.woff* web
         fi
     done
+
+    exit 0
+fi
+
+if [ "$1" == "windows" ]
+then
     prj=$(basename $PWD)
     web=$HOME/guest/$prj-web
     rm -rf $web
@@ -144,6 +145,14 @@ then
         /bin/mv -v ${base}.odt ~/guest
     done
     popd
+
+    exit 0
+fi
+
+if [ "$1" == "apple" ]
+then
+    chmod -R go+Xr web
+    rsync -v -a --delete web/ nrsi.sil.org:/var/www/fonts/
 
     exit 0
 fi

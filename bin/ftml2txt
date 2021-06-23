@@ -26,6 +26,12 @@ def main():
             text = ftml_data.text()
             text_file.write(text)
 
+        # Write HTML file
+        html_filename = f'../web/{base_filename}.html'
+        with open(html_filename, 'w') as html_file:
+            html = ftml_data.html()
+            html_file.write(html)
+
 
 class FTML:
     """Test data in an FTML file"""
@@ -62,6 +68,23 @@ class FTML:
             text += testgroup.text()
         return text
 
+    def html(self):
+        """Format data for a plain text file"""
+        html = """<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="design.css" type="text/css">
+<meta charset="utf-8">
+</head>
+<body>
+"""
+        for testgroup in self.testgroups:
+            html += testgroup.html()
+        html += """</body>
+</html>
+"""
+        return html
+
 
 class TestGroup:
     """Test group in an FTML file"""
@@ -83,6 +106,13 @@ class TestGroup:
             text += test.text()
         return text
 
+    def html(self):
+        """Format data for a HTML file"""
+        html = '<h1>' + self.data + '</h1>\n'
+        for test in self.tests:
+            html += test.html()
+        return html
+
 
 class Test:
     """Test in an FTML file"""
@@ -94,6 +124,13 @@ class Test:
     def text(self):
         """Format data for a plain text file"""
         return(self.label + ' ' + self.data + '\n')
+
+    def html(self):
+        """Format data for a HTML file"""
+        label = f'<p>{self.label}</p>\n'
+        local = f'<p>{self.data}</p>\n'
+        woff2 = f'<p class=design>{self.data}</p>\n'
+        return label + local + woff2
 
 
 if __name__ == "__main__":
