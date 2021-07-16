@@ -6,6 +6,12 @@ then
     source .smithrc
 fi
 
+if [ ! -f wscript ]
+then
+    echo "Must be in the root of the project"
+    exit 1
+fi
+
 if [ $HOSTNAME = fossa ]
 then
     if [ -f wscript ]
@@ -121,9 +127,13 @@ then
     if [ -d generated ]
     then
         pushd generated
-        for txt in *.txt
+        for txt_file in *.txt ../*.txt ../../dev/*.txt
         do
-            unix2dos -n $txt ~/guest/$txt
+            if [ -f $txt_file ]
+            then
+                txt=$(basename $txt_file)
+                unix2dos -n $txt_file ~/guest/$txt
+            fi
         done
         popd
     fi
@@ -140,9 +150,7 @@ then
         fi
 
         # produce docuemnt
-        base=$(basename $ftml .ftml)
-        ftml2odt ${base}
-        /bin/mv -v ${base}.odt ~/guest
+        ftml2odt ${ftml%.ftml}
     done
     popd
 
@@ -175,31 +183,43 @@ then
         fi
     done
 
-    for txt in *.txt
-    do
-        if [ -f $txt ]
-        then
-            cp $txt generated
-        fi
-    done
-
     for ftml in *.ftml
     do
         if [ -f $ftml ]
         then
             ftml2txt $ftml
+            cp ../dev/${ftml%.ftml}.txt generated/${ftml%.ftml}.htxt
         fi
     done
 
-    pushd generated
-    for txt in *.txt
-    do
-        for nf in nfc nfd
+    if [ -f ../source/master.gdl ]
+    then
+        pushd generated
+        for txt_file in *.txt ../*.txt ../../dev/*.txt
         do
-            txtconv -i $txt -o ${txt%.txt}-$nf.txt -$nf -nobom
+            txt=$(basename $txt_file)
+            for nf in nfc nfd
+            do
+                txtconv -i $txt_file -o ${txt%.txt}-$nf.txt -$nf -nobom
+            done
         done
-    done
+        popd
+    fi
+
     popd
+
+    exit 0
+fi
+
+if [ "$1" == "reference" ]
+then
+    pushd dev
+    cp -p *.ttf old
+    for ttf in *.ttf
+    do
+        cp -p ~/guest/$ttf .
+    done
+    ls -l
     popd
 
     exit 0

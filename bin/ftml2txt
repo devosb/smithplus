@@ -21,7 +21,7 @@ def main():
         (base_filename, ext) = os.path.splitext(ftml_filename)
 
         # Write plain text file
-        text_filename = f'generated/{base_filename}-ftml.txt'
+        text_filename = f'../dev/{base_filename}.txt'
         with open(text_filename, 'w') as text_file:
             text = ftml_data.text()
             text_file.write(text)
