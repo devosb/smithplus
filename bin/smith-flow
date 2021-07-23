@@ -172,6 +172,11 @@ then
         ./$auto tests/$(basename $auto .py).txt
     done
 
+    if [ -f tools/genftmlfiles.sh ]
+    then
+        ./tools/genftmlfiles.sh
+    fi
+
     pushd tests
     /bin/rm -rf generated
     mkdir generated

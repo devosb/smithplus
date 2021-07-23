@@ -52,8 +52,9 @@ class FTML:
             tests = self.add_testgroup(testgroup.get('label'))
             for test in testgroup.iter('test'):
                 label = test.get('label')
+                comment = test.findtext('comment', '')
                 data = test.find('string').text
-                tests.add_test(label, data)
+                tests.add_test(label, comment, data)
 
     def add_testgroup(self, data):
         """Add a TestGroup with data"""
@@ -93,17 +94,19 @@ class TestGroup:
         self.data = label
         self.tests = list()
 
-    def add_test(self, label, data):
+    def add_test(self, label, comment, data):
         """Add test"""
-        test = Test(label, data)
+        test = Test(label, comment, data)
         self.tests.append(test)
         return test
 
     def text(self):
         """Format data for a plain text file"""
-        text = r'\# ' + self.data + '\n'
+        text = '# ' + self.data + '\n'
         for test in self.tests:
             text += test.text()
+        for char in r'\#$%&()^_~':
+            text = text.replace(char, '\\' + char)
         return text
 
     def html(self):
@@ -117,17 +120,18 @@ class TestGroup:
 class Test:
     """Test in an FTML file"""
 
-    def __init__(self, label, data):
+    def __init__(self, label, comment, data):
         self.label = label
+        self.comment = comment
         self.data = unikey.modify(data)
 
     def text(self):
         """Format data for a plain text file"""
-        return(self.label + ' ' + self.data + '\n')
+        return(self.label + ': ' + self.comment + ' ' + self.data + '\n')
 
     def html(self):
         """Format data for a HTML file"""
-        label = f'<p>{self.label}</p>\n'
+        label = f'<p>{self.label}: {self.comment}</p>\n'
         local = f'<p>{self.data}</p>\n'
         woff2 = f'<p class=design>{self.data}</p>\n'
         return label + local + woff2
