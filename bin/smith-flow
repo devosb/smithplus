@@ -57,6 +57,7 @@ then
                 echo "building instance fonts from $dspace"
                 fontmake -m $dspace --keep-overlaps -i -o otf ttf
                 variable=$dspace
+                familypath=${variable%Design.designspace}
             fi
         done
 
@@ -65,13 +66,18 @@ then
             if [ -f $dspace ]
             then
                 variable=$dspace
+                familypath=${variable%Variable.designspace}
             fi
         done
 
         if [ -f $variable ]
         then
             echo "building variable font from $variable"
-            fontmake -m $variable -o variable
+            familyname=${familypath#source/}
+            vardir=variable_ttf
+            mkdir $vardir
+            fontpath=${vardir}/${familyname}-VF.ttf
+            fontmake -m $variable --output-path $fontpath -o variable
         fi
     else
         for dspace in source/*.designspace
@@ -149,7 +155,7 @@ then
             echo "ftml file $ftml is invalid"
         fi
 
-        # produce docuemnt
+        # produce document
         ftml2odt ${ftml%.ftml}
     done
     popd
@@ -224,7 +230,7 @@ then
     do
         cp -p ~/guest/$ttf .
     done
-    ls -l
+    ls -l *.ttf
     popd
 
     exit 0
