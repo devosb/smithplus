@@ -46,6 +46,55 @@ then
     fi
 fi
 
+if [ "$1" == "ots" ]
+then
+    for output in *_*
+    do
+        flavor=$(echo $output | cut -d _ -f 2)
+        for font in $output/*.$flavor
+        do
+            namestyle=${font%.$flavor}
+            ots-sanitize $font > /dev/null 2> ${namestyle}-ots.log
+        done
+        ls -l -S $output/*-ots.log
+
+        if [ -d results ]
+        then
+            $HOME/.local/bin/smith ots
+        fi
+    done
+    exit 0
+fi
+
+if [ "$1" == "validate" ]
+then
+    for output in *_*
+    do
+        flavor=$(echo $output | cut -d _ -f 2)
+        for font in $output/*.$flavor
+        do
+            namestyle=${font%.$flavor}
+            fontval $font
+        done
+
+        if [ -d results ]
+        then
+            $HOME/.local/bin/smith validate
+        fi
+    done
+    exit 0
+fi
+
+if [ "$1" == "fontbakery" ]
+then
+    for output in *_*
+    do
+        flavor=$(echo $output | cut -d _ -f 2)
+        psfrunfbchecks --html $output/fbchecks.html --log $output/runfbchecks.log $output/*.$flavor
+    done
+    exit 0
+fi
+
 if [ "$1" == "make" ]
 then
     if [ -d source/masters ]
