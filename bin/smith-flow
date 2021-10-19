@@ -74,8 +74,9 @@ then
         for font in $output/*.$flavor
         do
             namestyle=${font%.$flavor}
-            fontval $font
+            fontval $font &
         done
+        wait
 
         if [ -d results ]
         then
@@ -105,29 +106,16 @@ then
             then
                 echo "building instance fonts from $dspace"
                 fontmake -m $dspace --keep-overlaps -i -o otf ttf
-                variable=$dspace
-                familypath=${variable%Design.designspace}
+                familypath=${dspace%Design.designspace}
+
+                echo "building variable font from $dspace"
+                familyname=${familypath#source/}
+                vardir=variable_ttf
+                mkdir $vardir
+                fontpath=${vardir}/${familyname}-VF.ttf
+                fontmake -m $dspace --output-path $fontpath -o variable
             fi
         done
-
-        for dspace in source/*Variable.designspace
-        do
-            if [ -f $dspace ]
-            then
-                variable=$dspace
-                familypath=${variable%Variable.designspace}
-            fi
-        done
-
-        if [ -f $variable ]
-        then
-            echo "building variable font from $variable"
-            familyname=${familypath#source/}
-            vardir=variable_ttf
-            mkdir $vardir
-            fontpath=${vardir}/${familyname}-VF.ttf
-            fontmake -m $variable --output-path $fontpath -o variable
-        fi
     else
         for dspace in source/*.designspace
         do
@@ -146,7 +134,11 @@ if [ "$1" == "install" ]
 then
     /bin/cp -p -v results/*.ttf ~/.fonts
     /bin/cp -p -v results/*.ttf ~/guest
-    rsync -a -v *_* ~/guest
+    for makedir in *_*
+    do
+        mkdir ~/guest/$makedir
+        cp -p -v $makedir/*.?tf ~/guest/$makedir
+    done
 
     for www in web woff
     do
