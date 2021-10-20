@@ -1,0 +1,76 @@
+#!/usr/bin/python3
+__doc__ = 'Fix fonts generated using fontmake'
+__url__ = 'http://github.com/silnrsi/pysilfont'
+__copyright__ = 'Copyright (c) 2021 SIL International (http://www.sil.org)'
+__license__ = 'Released under the MIT License (http://opensource.org/licenses/MIT)'
+__author__ = 'Bobby de Vos'
+
+from silfont.core import execute, splitfn
+from fontTools.ttLib import TTFont
+
+WINDOWS_ENGLISH_IDS = 3, 1, 0x409
+
+FAMILY_RELATED_IDS = dict(
+    Family=1,
+    Subfamily=2,
+    FullName=4,
+)
+
+argspec = [
+    ('font', {'help': 'ttf font(s) to fix', 'nargs': "+"}, {'type': 'filename'}),
+]
+
+
+def doit(args):
+    for filename in args.font:
+        font = TTFont(filename)
+        name = font['name']
+        os2 = font['OS/2']
+        head = font['head']
+        (platform_id, encoding_id, language_id) = WINDOWS_ENGLISH_IDS
+
+        family = name.getName(
+            nameID=FAMILY_RELATED_IDS['Family'],
+            platformID=platform_id,
+            platEncID=encoding_id,
+            langID=language_id
+        )
+        subfamily = name.getName(
+            nameID=FAMILY_RELATED_IDS['Subfamily'],
+            platformID=platform_id,
+            platEncID=encoding_id,
+            langID=language_id
+        )
+        full_name = name.getName(
+            nameID=FAMILY_RELATED_IDS['FullName'],
+            platformID=platform_id,
+            platEncID=encoding_id,
+            langID=language_id
+        )
+
+        # Fix font
+        if str(family).endswith(' Italic'):
+            family.string = str(family).replace(' Italic', '')
+
+        if str(full_name).endswith('Italic'):
+            # Set Italic bits
+            os2.fsSelection = os2.fsSelection | 1 << 0
+            head.macStyle = head.macStyle | 1 << 1
+
+            # Clear Regular bit
+            os2.fsSelection = os2.fsSelection & ~(1 << 6)
+
+            # Fix Subfamily name
+            if not str(subfamily).endswith('Italic'):
+                subfamily.string = 'Italic'
+
+        font.save(filename)
+        font.close()
+        del font
+
+
+def cmd(): execute('FT', doit, argspec)
+
+
+if __name__ == '__main__':
+    cmd()

@@ -86,6 +86,34 @@ then
     exit 0
 fi
 
+if [ "$1" == "zip" ]
+then
+    for output in *_*
+    do
+        flavor=$(echo $output | cut -d _ -f 2)
+        for font in $output/*.$flavor
+        do
+            pathnamestyle=${font%.$flavor}
+            namestyle=${pathnamestyle#$output/}
+            download=$(echo $namestyle | cut -d \- -f 1)
+            mkdir $download
+            cp $font $download
+        done
+        for txt in *.txt
+        do
+            unix2dos -n $txt $download/$txt
+            chmod 644 $download/$txt
+        done
+        zip -r $download $download
+
+        if [ -d results ]
+        then
+            $HOME/.local/bin/smith zip
+        fi
+    done
+    exit 0
+fi
+
 if [ "$1" == "fontbakery" ]
 then
     for output in *_*
@@ -104,24 +132,38 @@ then
         do
             if [ -f $dspace ]
             then
-                echo "building instance fonts from $dspace"
-                fontmake -m $dspace --keep-overlaps -i -o otf ttf
-                familypath=${dspace%Design.designspace}
-
-                echo "building variable font from $dspace"
-                familyname=${familypath#source/}
-                vardir=variable_ttf
-                mkdir $vardir
-                fontpath=${vardir}/${familyname}-VF.ttf
-                fontmake -m $dspace --output-path $fontpath -o variable
+                if [ "$2" == "otf" -o -z "$2" ]
+                then
+                    echo "building otf instance fonts from $dspace"
+                    fontmake -m $dspace --keep-overlaps -i -o otf
+                fi
+                if [ "$2" == "ttf" -o -z "$2" ]
+                then
+                    echo "building ttf instance fonts from $dspace"
+                    fontmake -m $dspace --keep-overlaps -i -o ttf
+                fi
+                if [ "$2" == "variable" -o -z "$2" ]
+                then
+                    echo "building variable font from $dspace"
+                    familypath=${dspace%Design.designspace}
+                    familyname=${familypath#source/}
+                    vardir=variable_ttf
+                    mkdir $vardir
+                    fontpath=${vardir}/${familyname}-VF.ttf
+                    fontmake -m $dspace --output-path $fontpath -o variable
+                fi
             fi
+        done
+        for output in instance_*
+        do
+            fixttf $output/*.?tf
         done
     else
         for dspace in source/*.designspace
         do
             if [ -f $dspace ]
             then
-                echo "building static fonts from $dspace"
+                echo "building otf and ttf static fonts from $dspace"
                 fontmake -m $dspace -o otf ttf
             fi
         done

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ -z "$1" ]
+then
+    echo "new test name must be specified"
+    exit 1
+fi
+
+tmp=$(mktemp -p /run/shm)
+for dspace in source/*Design.designspace
+do
+    sed -e "s/Test A/$1/g" $dspace > $tmp
+    sed -e "s/TestA/$1/g" $tmp > $dspace
+done
+rm $tmp
