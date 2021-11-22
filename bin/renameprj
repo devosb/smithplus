@@ -7,9 +7,12 @@ then
 fi
 
 tmp=$(mktemp -p /run/shm)
-for dspace in source/*Design.designspace
+for dspace in source/*Design.designspace source/*Smith.designspace
 do
-    sed -e "s/Test A/$1/g" $dspace > $tmp
-    sed -e "s/TestA/$1/g" $tmp > $dspace
+    if [ -f $dspace ]
+    then
+        sed -e "s/Test A/$1/g" $dspace > $tmp
+        sed -e "s/TestA/$1/g" $tmp > $dspace
+    fi
 done
 rm $tmp
