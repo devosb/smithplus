@@ -261,7 +261,7 @@ then
         ./$auto tests/$(basename $auto .py).txt
     done
 
-    if [ -f tools/genftmlfiles.sh ]
+    if [ -x tools/genftmlfiles.sh ]
     then
         ./tools/genftmlfiles.sh
     fi
@@ -340,20 +340,6 @@ fi
 if [ "$1" == "update" ]
 then
     gdcsv
-
-    if [ -d documentation ]
-    then
-        pushd documentation
-        for odt in *.odt
-        do
-            pdf=$(basename $odt .odt).pdf
-            if [ $odt -nt $pdf ]
-            then
-                soffice --convert-to pdf $odt
-            fi
-        done
-        popd
-    fi
 
     for ufo in source/*.ufo source/masters/*.ufo
     do
