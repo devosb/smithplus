@@ -156,7 +156,10 @@ then
         done
         for output in instance_*
         do
-            fixttf $output/*.?tf
+            if [ -d $output ]
+            then
+                fixttf $output/*.?tf
+            fi
         done
     else
         for dspace in source/*.designspace

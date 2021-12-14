@@ -11,8 +11,14 @@ for dspace in source/*Design.designspace source/*Smith.designspace
 do
     if [ -f $dspace ]
     then
-        sed -e "s/Test A/$1/g" $dspace > $tmp
-        sed -e "s/TestA/$1/g" $tmp > $dspace
+        sed -e "s/Pro/$1/g" $dspace > $tmp
+        mv $tmp $dspace
     fi
 done
-rm $tmp
+for ufo in source/*.ufo source/masters/*.ufo
+do
+    if [ -d $ufo ]
+    then
+        renameufo "$1" $ufo
+    fi
+done
