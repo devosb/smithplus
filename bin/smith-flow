@@ -50,6 +50,10 @@ if [ "$1" == "ots" ]
 then
     for output in *_*
     do
+        if [ ! -d $output ]
+        then
+            continue
+        fi
         flavor=$(echo $output | cut -d _ -f 2)
         for font in $output/*.$flavor
         do
@@ -57,12 +61,11 @@ then
             ots-sanitize $font > /dev/null 2> ${namestyle}-ots.log
         done
         ls -l -S $output/*-ots.log
-
-        if [ -d results ]
-        then
-            $HOME/.local/bin/smith ots
-        fi
     done
+    if [ -d results ]
+    then
+        $HOME/.local/bin/smith ots
+    fi
     exit 0
 fi
 
@@ -70,6 +73,10 @@ if [ "$1" == "validate" ]
 then
     for output in *_*
     do
+        if [ ! -d $output ]
+        then
+            continue
+        fi
         flavor=$(echo $output | cut -d _ -f 2)
         for font in $output/*.$flavor
         do
@@ -77,12 +84,11 @@ then
             fontval $font &
         done
         wait
-
-        if [ -d results ]
-        then
-            $HOME/.local/bin/smith validate
-        fi
     done
+    if [ -d results ]
+    then
+        $HOME/.local/bin/smith validate
+    fi
     exit 0
 fi
 
@@ -90,6 +96,10 @@ if [ "$1" == "zip" ]
 then
     for output in *_*
     do
+        if [ ! -d $output ]
+        then
+            continue
+        fi
         flavor=$(echo $output | cut -d _ -f 2)
         for font in $output/*.$flavor
         do
@@ -105,12 +115,11 @@ then
             chmod 644 $download/$txt
         done
         zip -r $download $download
-
-        if [ -d results ]
-        then
-            $HOME/.local/bin/smith zip
-        fi
     done
+    if [ -d results ]
+    then
+        $HOME/.local/bin/smith zip
+    fi
     exit 0
 fi
 
@@ -118,6 +127,10 @@ if [ "$1" == "fontbakery" ]
 then
     for output in *_*
     do
+        if [ ! -d $output ]
+        then
+            continue
+        fi
         flavor=$(echo $output | cut -d _ -f 2)
         psfrunfbchecks --html $output/fbchecks.html --log $output/runfbchecks.log $output/*.$flavor
     done
@@ -128,7 +141,7 @@ if [ "$1" == "make" ]
 then
     if [ -d source/masters ]
     then
-        for dspace in source/*Design.designspace
+        for dspace in source/*Make.designspace
         do
             if [ -f $dspace ]
             then
@@ -145,7 +158,7 @@ then
                 if [ "$2" == "variable" -o -z "$2" ]
                 then
                     echo "building variable font from $dspace"
-                    familypath=${dspace%Design.designspace}
+                    familypath=${dspace%Make.designspace}
                     familyname=${familypath#source/}
                     vardir=variable_ttf
                     mkdir $vardir
@@ -179,10 +192,14 @@ if [ "$1" == "install" ]
 then
     /bin/cp -p -v results/*.ttf ~/.fonts
     /bin/cp -p -v results/*.ttf ~/guest
-    for makedir in *_*
+    for output in *_*
     do
-        mkdir ~/guest/$makedir
-        cp -p -v $makedir/*.?tf ~/guest/$makedir
+        if [ ! -d $output ]
+        then
+            continue
+        fi
+        mkdir ~/guest/$output
+        cp -p -v $output/*.?tf ~/guest/$output
     done
 
     for www in web woff

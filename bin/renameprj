@@ -7,7 +7,7 @@ then
 fi
 
 tmp=$(mktemp -p /run/shm)
-for dspace in source/*Design.designspace source/*Smith.designspace
+for dspace in source/*Design.designspace source/*Make.designspace
 do
     if [ -f $dspace ]
     then
