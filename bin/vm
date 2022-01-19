@@ -18,9 +18,17 @@ snapshot)
     sudo lxc snapshot $2 updates
     ;;
 list)
+    instances=$(sudo lxc list -c n -f csv)
+    for instance in $instances
+    do
+        sudo lxc info $instance
+    done
     sudo lxc list
     ;;
+storage)
+    sudo lxc storage info default
+    ;;
 *)
-    echo "usage: vm [start|stop|login|restore|snapshot] container"
+    echo "usage: vm [start|stop|login|restore|snapshot|list|storage] container"
     ;;
 esac
