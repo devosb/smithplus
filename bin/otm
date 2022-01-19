@@ -1,0 +1,7 @@
+#!/bin/bash
+
+font="$1"
+
+sudo lxc start holland
+sudo lxc exec holland -- sudo --user ubuntu --login otm "${PWD}/${font}"
+sudo lxc stop holland

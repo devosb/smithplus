@@ -1,0 +1,26 @@
+#!/bin/bash
+
+case $1 in
+start)
+    sudo lxc start $2
+    ;;
+stop)
+    sudo lxc stop $2
+    ;;
+login)
+    sudo lxc exec $2 -- sudo --user ubuntu --login
+    ;;
+restore)
+    sudo lxc restore $2 updates
+    ;;
+snapshot)
+    sudo lxc delete $2/updates
+    sudo lxc snapshot $2 updates
+    ;;
+list)
+    sudo lxc list
+    ;;
+*)
+    echo "usage: vm [start|stop|login|restore|snapshot] container"
+    ;;
+esac
