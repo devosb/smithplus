@@ -1,0 +1,63 @@
+#/bin/bash
+
+umask 022
+sudo echo root
+
+for checkout in .*/checkout.bash
+do
+    lib3=${checkout%/checkout.bash}
+    src3=${lib3#.}
+
+    lib=${lib3/%3/}
+    src=${src3/%3/}
+
+    # Python3 is the default
+    if [ -d ${src}3 ]
+    then
+        mv -v ${lib3} ${lib}
+        sudo rm -rf ${src3}
+        bash ${lib}/checkout.bash
+    fi
+done
+
+exit 0
+
+if [ $HOSTNAME != fossa ]
+then
+    for upgrade in .*/upgrade-host.bash
+    do
+        lib3=${upgrade%/upgrade.bash}
+        src3=${lib3#.}
+
+        lib=${lib3/%3/}
+        src=${src3/%3/}
+
+        # Python3 is the default
+        if [ -d ${src}3 ]
+        then
+            echo sudo mv ${lib3} ${lib}
+            echo rm -rf ${src3}
+            echo bash ${lib}/checkout.bash
+        fi
+    done
+fi
+
+if [ $HOSTNAME = fossa ]
+then
+    for upgrade in .*/upgrade-guest.bash
+    do
+        lib3=${upgrade%/upgrade.bash}
+        src3=${lib3#.}
+
+        lib=${lib3/%3/}
+        src=${src3/%3/}
+
+        # Python3 is the default
+        if [ -d ${src}3 ]
+        then
+            echo sudo mv ${lib3} ${lib}
+            echo rm -rf ${src3}
+            echo bash ${lib}/checkout.bash
+        fi
+    done
+fi

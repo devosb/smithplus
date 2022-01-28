@@ -1,0 +1,48 @@
+#/bin/bash
+
+umask 077
+
+# remove if the scrupt needs to be modified and used
+exit 0
+
+pylib="booleanoperations compreffor cu2qu defcon designspacedocument fontmake fontmath fonttools glyphslib mutatormath pyclipper pyfontaine pysilfont ufo2ft ufolib"
+already=".fontbakery .fontparts .fontparts3 .freetype2"
+
+for src in $pylib fontparts
+do
+    src3=${src}3
+    lib=.${src}
+    lib3=${lib}3
+
+    # mkdir ${lib}
+    # mkdir ${lib3}
+    # cp -p ${src}/*.bash ${lib}
+    # cp -p ${src}/*.bash ${lib3}
+    # rm -f ${lib3}/upgrade.bash
+    # cp -p .fontparts/upgrade.bash ${lib}
+    # cp -p ../upgrade.bash ${lib3}
+    # cp -p ${src}/checkout.bash ${lib3}
+    # bash ../${lib3}/upgrade.bash
+    rm -rf ${src}
+    #bash ${lib}/checkout.bash
+    rm -rf ${src3}
+    #bash ${lib3}/checkout.bash
+    # popd
+done
+
+for update in .*/update.bash
+do
+    lib=${update%/update.bash}
+    src=${lib#.}
+    if [ -d ${src} ]
+    then
+		#pushd ${src}/${src}
+		rmdir ${src}
+		#popd
+	fi
+    #bash ../${lib}/update.bash
+
+
+
+
+done

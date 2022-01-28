@@ -1,0 +1,39 @@
+#/bin/bash
+
+if [ $HOSTNAME = fossa ]
+then
+    ssh-add $HOME/.ssh/id_ed25519_world
+fi
+
+for update in .*/update.bash
+do
+    lib=${update%/update.bash}
+    src=${lib#.}
+    pushd ${src}
+    bash ../${lib}/update.bash
+    popd
+done
+
+if [ $HOSTNAME != fossa ]
+then
+    for update in .*/update-host.bash
+    do
+        lib=${update%/update-host.bash}
+        src=${lib#.}
+        pushd ${src}
+        bash ../${lib}/update-host.bash
+        popd
+    done
+fi
+
+if [ $HOSTNAME = fossa ]
+then
+    for update in .*/update-guest.bash
+    do
+        lib=${update%/update-guest.bash}
+        src=${lib#.}
+        pushd ${src}
+        bash ../${lib}/update-guest.bash
+        popd
+    done
+fi

@@ -1,0 +1,31 @@
+#/bin/bash
+
+for checkout in .*/checkout.bash
+do
+    lib=${checkout%/checkout.bash}
+    src=${lib#.}
+    echo rm -rf $src
+    echo bash $checkout
+done
+
+if [ $HOSTNAME != fossa ]
+then
+    for checkout in .*/checkout-host.bash
+    do
+        lib=${checkout%/checkout-host.bash}
+        src=${lib#.}
+        echo rm -rf $src
+        echo bash $checkout
+    done
+fi
+
+if [ $HOSTNAME = fossa ]
+then
+    for checkout in .*/checkout-guest.bash
+    do
+        lib=${checkout%/checkout-guest.bash}
+        src=${lib#.}
+        echo rm -rf $src
+        echo bash $checkout
+    done
+fi

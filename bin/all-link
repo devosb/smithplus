@@ -1,0 +1,7 @@
+#/bin/bash
+
+for checkout in .*/checkout.bash
+do
+    lib=${checkout%/checkout.bash}
+    echo ln -s ${PWD}/${lib} ~/builds/${lib}
+done

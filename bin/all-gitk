@@ -1,0 +1,21 @@
+#/bin/bash
+
+#for update in */update.bash
+#do
+#    prj=${update%/update.bash}
+#    if [ -d ${prj}/${prj}/.git ]
+#    then
+#        pushd ${prj}/${prj}
+#        gitk
+#        popd
+#    fi
+#done
+
+for update in .*/update.bash
+do
+    lib=${update%/update.bash}
+    src=${lib#.}
+    pushd ${src}
+    gitk
+    popd
+done
