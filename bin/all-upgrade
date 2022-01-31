@@ -36,6 +36,9 @@ then
     done
 fi
 
+pip3 uninstall gftools
+pip3 install gftools
+
 pushd /run/shm
 echo shebang
 grep /usr/bin/python ~/.local/bin/*
@@ -53,3 +56,9 @@ pip3 show fonttools
 # bash ../.fonttools/upgrade.bash
 # popd
 # pip3 show fonttools
+
+rm -rf fourplus
+python3 -m venv fourplus
+source fourplus/bin/activate
+pip3 install fontmake
+pip3 install MutatorMath
