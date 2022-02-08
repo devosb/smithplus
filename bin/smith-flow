@@ -5,6 +5,7 @@ if [ -f .smithrc ]
 then
     source .smithrc
 fi
+prj=$(basename $PWD)
 
 if [ ! -f wscript ]
 then
@@ -16,7 +17,6 @@ if [ $HOSTNAME = fossa ]
 then
     if [ -f wscript ]
     then
-        prj=$(basename $PWD)
         rrun=../rrun-$prj
         if [ ! -x $rrun ]
         then
@@ -28,10 +28,10 @@ fi
 
 if [ "$1" == "bisect" ]
 then
-    prj="$2"
-    if [ -d "$prj" ]
+    repo="$2"
+    if [ -d "$repo" ]
     then
-        pushd $prj
+        pushd $repo
         smith distclean
         smith configure
         smith build
@@ -215,7 +215,6 @@ fi
 
 if [ "$1" == "windows" ]
 then
-    prj=$(basename $PWD)
     web=$HOME/guest/$prj-web
     rm -rf $web
     mkdir $web
@@ -378,4 +377,10 @@ then
     exit 0
 fi
 
+extra=$(echo ../$prj-*/tests)
+if [ -d $extra ]
+then
+    export SMITH_EXTRATESTDIR=$extra
+    echo "SMITH_EXTRATESTDIR is $SMITH_EXTRATESTDIR"
+fi
 $HOME/.local/bin/smith "$@" $FLOWARGS
