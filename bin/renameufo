@@ -11,24 +11,29 @@ def modify_name(base_name, old_name, suffix, nospace=False):
     if nospace:
         find_base_name = base_name.replace(' ', '')
     else:
-        add_suffix = ' ' + add_suffix
+        if add_suffix:
+            add_suffix = ' ' + add_suffix
     name = name.replace(find_base_name, find_base_name + add_suffix)
     return name
 
 
 # Command line arguments
 parser = argparse.ArgumentParser(description='Add a suffix to names in a UFO')
-parser.add_argument('suffix', help='Suffix to add to UFO names (such as Pro or VF)')
+parser.add_argument('--suffix', help='Suffix to add to UFO names (such as Pro or VF)')
 parser.add_argument('ufo', help='UFO to modify')
 parser.add_argument('--version', action='version', version='%(prog)s 0.1')
 args = parser.parse_args()
 
+suffix = ''
+if args.suffix:
+    suffix = args.suffix
+
 font = Font.open(args.ufo)
 base_name = font.info.familyName.replace(' Master', '')
-font.info.familyName = modify_name(base_name, font.info.familyName, args.suffix)
-font.info.openTypeNamePreferredFamilyName = modify_name(base_name, font.info.openTypeNamePreferredFamilyName, args.suffix)
-font.info.openTypeNameUniqueID = modify_name(base_name, font.info.openTypeNameUniqueID, args.suffix)
-font.info.postscriptFontName = modify_name(base_name, font.info.postscriptFontName, args.suffix, True)
-font.info.postscriptFullName = modify_name(base_name, font.info.postscriptFullName, args.suffix)
-font.info.styleMapFamilyName = modify_name(base_name, font.info.styleMapFamilyName, args.suffix)
+font.info.familyName = modify_name(base_name, font.info.familyName, suffix)
+font.info.openTypeNamePreferredFamilyName = modify_name(base_name, font.info.openTypeNamePreferredFamilyName, suffix)
+font.info.openTypeNameUniqueID = modify_name(base_name, font.info.openTypeNameUniqueID, suffix)
+font.info.postscriptFontName = modify_name(base_name, font.info.postscriptFontName, suffix, True)
+font.info.postscriptFullName = modify_name(base_name, font.info.postscriptFullName, suffix)
+font.info.styleMapFamilyName = modify_name(base_name, font.info.styleMapFamilyName, suffix)
 font.save()

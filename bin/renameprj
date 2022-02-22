@@ -1,24 +1,28 @@
 #!/bin/bash
 
-if [ -z "$1" ]
+new="$1"
+padding=""
+ufo_opt=""
+if [ -n "$new" ]
 then
-    echo "new test name must be specified"
-    exit 1
+    padding=" "
+    ufo_opt="--suffix $new"
 fi
 
 tmp=$(mktemp -p /run/shm)
-for dspace in source/*Design.designspace source/*Make.designspace
+for dspace in source/*Design.designspace source/*Make.designspace source/*Smith.designspace
 do
     if [ -f $dspace ]
     then
-        sed -e "s/Pro/$1/g" $dspace > $tmp
-        mv $tmp $dspace
+        sed -e "s/ VF/${padding}${1}/g" $dspace > $tmp
+        sed -e "s/VF/${1}/g" $tmp > $dspace
     fi
 done
 for ufo in source/*.ufo source/masters/*.ufo
 do
     if [ -d $ufo ]
     then
-        renameufo "$1" $ufo
+        renameufo $ufo_opt $ufo
     fi
 done
+rm $tmp
