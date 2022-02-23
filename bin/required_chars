@@ -1,0 +1,37 @@
+#!/usr/bin/python3
+
+import csv
+import argparse
+
+# Command line arguments
+parser = argparse.ArgumentParser(description='Validate list of required (or basic) characters against the AGLFN')
+parser.add_argument('aglfn', help='Adobe Glyph List For New Fonts')
+parser.add_argument('basic', help='CSV of basic characters')
+args = parser.parse_args()
+
+# Load Adobe Glyph List For New Fonts (AGLFN)
+aglfn = dict()
+with open(args.aglfn, newline='') as aglfn_file:
+    for line in aglfn_file:
+
+        # Ignore comments
+        line = line.partition('#')[0]
+        line = line.strip()
+
+        # Ignore blank lines
+        if line == '':
+            continue
+
+        # Load data
+        (usv, aglfn_name, unicode_name) = line.split(';')
+        aglfn[usv] = aglfn_name
+
+# Load list of basic characters
+with open(args.basic, newline='') as basic_file:
+    reader = csv.DictReader(basic_file)
+    for row in reader:
+        usv = row['USV'].replace('U+', '')
+        ps_name = row['ps_name']
+        glyph_list = aglfn.get(usv, 'uni' + usv)
+        if glyph_list != ps_name:
+            print(f'{usv} is {ps_name}, should be {glyph_list}')
