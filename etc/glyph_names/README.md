@@ -14,3 +14,4 @@ It was started by
 - removing all the comments
 - changing the field separator from a `;` to a `,`
 - adding additional glyph names, mostly following `glyphlist.txt` from the above repo
+- Rename Omega to Omegagreek so it is not confused with Ohm (U+2126) which is called Omega in AGLFN
