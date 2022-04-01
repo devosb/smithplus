@@ -48,7 +48,7 @@ fi
 
 if [ "$1" == "ots" ]
 then
-    for output in *_*
+    for output in *_?tf
     do
         if [ ! -d $output ]
         then
@@ -71,7 +71,7 @@ fi
 
 if [ "$1" == "validate" ]
 then
-    for output in *_*
+    for output in *_?tf
     do
         if [ ! -d $output ]
         then
@@ -94,7 +94,7 @@ fi
 
 if [ "$1" == "zip" ]
 then
-    for output in *_*
+    for output in *_?tf
     do
         if [ ! -d $output ]
         then
@@ -125,7 +125,7 @@ fi
 
 if [ "$1" == "fontbakery" ]
 then
-    for output in *_*
+    for output in *_?tf
     do
         if [ ! -d $output ]
         then
@@ -192,7 +192,7 @@ if [ "$1" == "install" ]
 then
     /bin/cp -p -v results/*.ttf ~/.fonts
     /bin/cp -p -v results/*.ttf ~/guest
-    for output in *_*
+    for output in *_?tf
     do
         if [ ! -d $output ]
         then

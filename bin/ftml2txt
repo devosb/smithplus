@@ -74,7 +74,7 @@ class FTML:
         html = """<!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" href="design.css" type="text/css">
+<link rel="stylesheet" href="dev.css" type="text/css">
 <meta charset="utf-8">
 </head>
 <body>

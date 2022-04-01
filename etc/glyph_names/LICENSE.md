@@ -1,4 +1,4 @@
-Copyright (c) 2014-2021 SIL International (http://www.sil.org)
+Copyright (c) 2014-2022 SIL International (http://www.sil.org)
 
 Additions and modifications starting from the original Adobe
 aglfn.txt file are copyright as noted above. The original license is

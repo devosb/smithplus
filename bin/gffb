@@ -19,7 +19,7 @@ do
     then
         profile_option="--profile $profile_settings"
     fi
-    psfrunfbchecks $profile_option --html $family-fbchecks.html --log $family-runfbchecks.log $family-*.ttf
+    psfrunfbchecks $profile_option --full-lists --html $family-fbchecks.html --log $family-runfbchecks.log $family-*.ttf
 done
 
 popd
