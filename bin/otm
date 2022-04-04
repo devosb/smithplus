@@ -1,7 +1,4 @@
 #!/bin/bash
 
-font="$1"
-
-sudo lxc start holland
-sudo lxc exec holland -- sudo --user ubuntu --login otm "${PWD}/${font}"
-sudo lxc stop holland
+export LD_LIBRARY_PATH=$HOME/builds/icu/source/lib
+OTM_89 "$@"
