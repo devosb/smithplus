@@ -1,0 +1,60 @@
+#!/usr/bin/python3
+
+import importlib.util
+from fontTools.ttLib import TTFont
+from palaso.unicode.ucd import UCD
+import sys
+import os
+import argparse
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Check character inventory of a TTF font')
+    parser.add_argument('charset', help='Character set to check')
+    parser.add_argument('font', help='TTF font files to process', nargs='+')
+    parser.add_argument('--version', action='version', version='%(prog)s ' + '0.1')
+    args = parser.parse_args()
+
+    charset = get_charset(args.charset)
+    ucd = UCD()
+    for font_filename in args.font:
+        print(f'{font_filename}:')
+        check_cmap(charset, font_filename, ucd)
+
+
+def get_charset(charset_name):
+    # file containing the charset
+    home = os.environ["HOME"]
+    charsets = 'builds/pyfontaine/fontaine/charsets/internals'
+    charset_filename = os.path.join(home, charsets, charset_name + '.py')
+
+    # load the charset file
+    spec = importlib.util.spec_from_file_location('acharset', charset_filename)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules['acharset'] = module
+    spec.loader.exec_module(module)
+    import acharset
+
+    # return the list of characters in the charset
+    return set(acharset.Charset.glyphs)
+
+
+def check_cmap(charset, font_filename, ucd):
+    # load cmap from the font
+    font = TTFont(font_filename)
+    cmap = font.getBestCmap()
+
+    # collect the codepoints in the font
+    codepoints = set()
+    for codepoint, glyph_name in cmap.items():
+        codepoints.add(codepoint)
+
+    # output characters that are in the charset
+    # but are missing from the font
+    for char in sorted(charset - codepoints):
+        name = ucd.get(char, 'na')
+        print(f'U+{char:04X} {name}')
+
+
+if __name__ == "__main__":
+    main()
