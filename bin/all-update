@@ -1,6 +1,6 @@
 #/bin/bash
 
-if [ $HOSTNAME = fossa ]
+if [ $HOSTNAME = apple ]
 then
     ssh-add $HOME/.ssh/id_ed25519_world
 fi
@@ -14,7 +14,7 @@ do
     popd
 done
 
-if [ $HOSTNAME != fossa ]
+if [ $HOSTNAME != apple ]
 then
     for update in .*/update-host.bash
     do
@@ -26,7 +26,7 @@ then
     done
 fi
 
-if [ $HOSTNAME = fossa ]
+if [ $HOSTNAME = apple ]
 then
     for update in .*/update-guest.bash
     do

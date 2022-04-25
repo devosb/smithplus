@@ -8,7 +8,7 @@ do
     echo bash $checkout
 done
 
-if [ $HOSTNAME != fossa ]
+if [ $HOSTNAME != apple ]
 then
     for checkout in .*/checkout-host.bash
     do
@@ -19,7 +19,7 @@ then
     done
 fi
 
-if [ $HOSTNAME = fossa ]
+if [ $HOSTNAME = apple ]
 then
     for checkout in .*/checkout-guest.bash
     do

@@ -3,38 +3,53 @@
 umask 022
 sudo echo root
 
-for upgrade in .*/upgrade.bash
+for level in 1 2 3 4 5 6 7 8 9 ''
 do
-    lib=${upgrade%/upgrade.bash}
-    src=${lib#.}
-    pushd ${src}
-    bash ../${lib}/upgrade.bash
-    popd
+    for upgrade in .*/${level}upgrade.bash
+    do
+        if [ ! -f ${upgrade} ]
+        then
+            continue
+        fi
+        lib=$(dirname ${upgrade})
+        src=${lib#.}
+        pushd ${src}
+        bash ../${upgrade}
+        popd
+    done
+
+    if [ $HOSTNAME != apple ]
+    then
+        for upgrade in .*/${level}upgrade-host.bash
+        do
+            if [ ! -f ${upgrade} ]
+            then
+                continue
+            fi
+            lib=$(dirname ${upgrade})
+            src=${lib#.}
+            pushd ${src}
+            bash ../${upgrade}
+            popd
+        done
+    fi
+
+    if [ $HOSTNAME = apple ]
+    then
+        for upgrade in .*/${level}upgrade-guest.bash
+        do
+            if [ ! -f ${upgrade} ]
+            then
+                continue
+            fi
+            lib=$(dirname ${upgrade})
+            src=${lib#.}
+            pushd ${src}
+            bash ../${upgrade}
+            popd
+        done
+    fi
 done
-
-if [ $HOSTNAME != fossa ]
-then
-    for upgrade in .*/upgrade-host.bash
-    do
-        lib=${upgrade%/upgrade-host.bash}
-        src=${lib#.}
-        pushd ${src}
-        bash ../${lib}/upgrade-host.bash
-        popd
-    done
-fi
-
-if [ $HOSTNAME = fossa ]
-then
-    for upgrade in .*/upgrade-guest.bash
-    do
-        lib=${upgrade%/upgrade-guest.bash}
-        src=${lib#.}
-        pushd ${src}
-        bash ../${lib}/upgrade-guest.bash
-        popd
-    done
-fi
 
 pip3 uninstall gftools
 pip3 install gftools
