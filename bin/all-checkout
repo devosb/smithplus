@@ -1,31 +1,23 @@
 #/bin/bash
 
-for checkout in .*/checkout.bash
-do
-    lib=${checkout%/checkout.bash}
-    src=${lib#.}
-    echo rm -rf $src
-    echo bash $checkout
-done
-
-if [ $HOSTNAME != apple ]
-then
-    for checkout in .*/checkout-host.bash
-    do
-        lib=${checkout%/checkout-host.bash}
-        src=${lib#.}
-        echo rm -rf $src
-        echo bash $checkout
-    done
-fi
-
+locations=host
 if [ $HOSTNAME = apple ]
 then
-    for checkout in .*/checkout-guest.bash
+    locations=guest
+fi
+
+for location in all $locations
+do
+    suffix=-$location
+    if [ $location = all ]
+    then
+        suffix=''
+    fi
+    for checkout in .*/checkout${suffix}.bash
     do
-        lib=${checkout%/checkout-guest.bash}
+        lib=$(dirname ${checkout})
         src=${lib#.}
         echo rm -rf $src
         echo bash $checkout
     done
-fi
+done

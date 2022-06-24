@@ -1,0 +1,28 @@
+#/bin/bash
+
+# Many Python projects use the upgrade.bash script from thefoxutils.
+# Other Python projects (list following) use this script with additions.
+# - palaso-python
+# - fonttools (might be able to use the common upgrade script)
+# - smith
+
+for level in 1 2 3 4 5 6 7 8 9 ''
+do
+    for location in all host guest
+    do
+        suffix=-$location
+        if [ $location = all ]
+        then
+            suffix=''
+        fi
+        for upgrade in .*/${level}upgrade${suffix}.bash
+        do
+            lib=$(dirname ${upgrade})
+            src=${lib#.}
+            if [ -f ${src}/setup.py ]
+            then
+                echo ${src}
+            fi
+        done
+    done
+done

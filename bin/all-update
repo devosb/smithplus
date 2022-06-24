@@ -1,39 +1,25 @@
 #/bin/bash
 
+locations=host
 if [ $HOSTNAME = apple ]
 then
+    locations=guest
     ssh-add $HOME/.ssh/id_ed25519_world
 fi
 
-for update in .*/update.bash
+for location in all $locations
 do
-    lib=${update%/update.bash}
-    src=${lib#.}
-    pushd ${src}
-    bash ../${lib}/update.bash
-    popd
+    suffix=-$location
+    if [ $location = all ]
+    then
+        suffix=''
+    fi
+    for update in .*/update${suffix}.bash
+    do
+        lib=$(dirname ${update})
+        src=${lib#.}
+        pushd ${src}
+        bash ../${update}
+        popd
+    done
 done
-
-if [ $HOSTNAME != apple ]
-then
-    for update in .*/update-host.bash
-    do
-        lib=${update%/update-host.bash}
-        src=${lib#.}
-        pushd ${src}
-        bash ../${lib}/update-host.bash
-        popd
-    done
-fi
-
-if [ $HOSTNAME = apple ]
-then
-    for update in .*/update-guest.bash
-    do
-        lib=${update%/update-guest.bash}
-        src=${lib#.}
-        pushd ${src}
-        bash ../${lib}/update-guest.bash
-        popd
-    done
-fi

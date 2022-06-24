@@ -13,7 +13,7 @@ then
     exit 1
 fi
 
-if [ $HOSTNAME = fossa ]
+if [ $HOSTNAME = apple ]
 then
     if [ -f wscript ]
     then
@@ -275,11 +275,6 @@ fi
 
 if [ "$1" == "data" ]
 then
-    for auto in tools/auto-*
-    do
-        ./$auto tests/$(basename $auto .py).txt
-    done
-
     if [ -x tools/genftmlfiles.sh ]
     then
         ./tools/genftmlfiles.sh
@@ -374,6 +369,20 @@ then
 
     /bin/rm -rf {source,tests}/{'',masters}/{backups,logs}
 
+    exit 0
+fi
+
+if [ "$1" == "version" ]
+then
+    version="$2"
+    for ufo in source/*.ufo source/masters/*.ufo
+    do
+        if [ -d $ufo ]
+        then
+            psfsetversion $ufo "$version"
+        fi
+    done
+    bumpversion --allow-dirty --new-version "$version" major
     exit 0
 fi
 

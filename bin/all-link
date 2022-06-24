@@ -2,6 +2,8 @@
 
 for checkout in .*/checkout.bash
 do
-    lib=${checkout%/checkout.bash}
+    lib=$(dirname ${checkout})
     echo ln -s ${PWD}/${lib} ~/builds/${lib}
+    src=${lib#.}
+    git clone ${src} ~/builds/${src}
 done

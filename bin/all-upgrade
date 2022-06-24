@@ -3,56 +3,35 @@
 umask 022
 sudo echo root
 
+locations=host
+if [ $HOSTNAME = apple ]
+then
+    locations=guest
+fi
+
 for level in 1 2 3 4 5 6 7 8 9 ''
 do
-    for upgrade in .*/${level}upgrade.bash
+    for location in all $locations
     do
-        if [ ! -f ${upgrade} ]
+        suffix=-$location
+        if [ $location = all ]
         then
-            continue
+            suffix=''
         fi
-        lib=$(dirname ${upgrade})
-        src=${lib#.}
-        pushd ${src}
-        bash ../${upgrade}
-        popd
+        for upgrade in .*/${level}upgrade${suffix}.bash
+        do
+            if [ ! -f ${upgrade} ]
+            then
+                continue
+            fi
+            lib=$(dirname ${upgrade})
+            src=${lib#.}
+            pushd ${src}
+            bash ../${upgrade}
+            popd
+        done
     done
-
-    if [ $HOSTNAME != apple ]
-    then
-        for upgrade in .*/${level}upgrade-host.bash
-        do
-            if [ ! -f ${upgrade} ]
-            then
-                continue
-            fi
-            lib=$(dirname ${upgrade})
-            src=${lib#.}
-            pushd ${src}
-            bash ../${upgrade}
-            popd
-        done
-    fi
-
-    if [ $HOSTNAME = apple ]
-    then
-        for upgrade in .*/${level}upgrade-guest.bash
-        do
-            if [ ! -f ${upgrade} ]
-            then
-                continue
-            fi
-            lib=$(dirname ${upgrade})
-            src=${lib#.}
-            pushd ${src}
-            bash ../${upgrade}
-            popd
-        done
-    fi
 done
-
-pip3 uninstall gftools
-pip3 install gftools
 
 pushd /run/shm
 echo shebang
@@ -66,12 +45,8 @@ popd
 
 # Use the latest fontTools
 pip3 show fonttools
-# rm -rf $HOME/.local/lib/python*/site-packages/fonttools-*.egg
-# pushd fonttools
-# bash ../.fonttools/upgrade.bash
-# popd
-# pip3 show fonttools
 
+# Install fontmake (again) in a virtual environment
 rm -rf fourplus
 python3 -m venv fourplus
 source fourplus/bin/activate

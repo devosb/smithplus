@@ -133,7 +133,7 @@ class Test:
         """Format data for a HTML file"""
         label = f'<p>{self.label}: {self.comment}</p>\n'
         local = f'<p>{self.data}</p>\n'
-        woff2 = f'<p class=design>{self.data}</p>\n'
+        woff2 = f'<p class=dev>{self.data}</p>\n'
         return label + local + woff2
 
 
