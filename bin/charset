@@ -15,7 +15,14 @@ def main():
     parser.add_argument('--version', action='version', version='%(prog)s ' + '0.1')
     args = parser.parse_args()
 
-    charset = get_charset(args.charset)
+    if args.charset.endswith('.nam'):
+        if os.path.exists(args.charset):
+            charset = get_namelist(args.charset)
+        else:
+            print(f'name file {args.charset} does not exist')
+            sys.exit(1)
+    else:
+        charset = get_charset(args.charset)
     ucd = UCD()
     for font_filename in args.font:
         print(f'{font_filename}:')
@@ -37,6 +44,19 @@ def get_charset(charset_name):
 
     # return the list of characters in the charset
     return set(acharset.Charset.glyphs)
+
+
+def get_namelist(namefile_filename):
+    # file containing the name list
+    codepoints = set()
+    with open(namefile_filename) as namefile:
+        for line in namefile:
+            usv = line.split()[0]
+            codepoint = int(usv, 16)
+            codepoints.add(codepoint)
+
+    # return the list of characters in the name file
+    return codepoints
 
 
 def check_cmap(charset, font_filename, ucd):
