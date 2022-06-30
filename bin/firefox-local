@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if [ ! -f wscript ]
+then
+    echo "Must be in the root of the project"
+    exit 1
+fi
+
+ffl=$HOME/ffl
+if [ ! -d $ffl ]
+then
+    mkdir $ffl
+fi
+for dir in results references tests tools
+do
+    rsync -a -v -h --exclude results/source --delete $dir $ffl
+done
+firefox $ffl/$1

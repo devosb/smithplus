@@ -4,7 +4,7 @@ locations=host
 if [ $HOSTNAME = apple ]
 then
     locations=guest
-    ssh-add $HOME/.ssh/id_ed25519_world
+    # ssh-add $HOME/.ssh/id_ed25519_world
 fi
 
 for location in all $locations

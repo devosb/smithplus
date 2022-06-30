@@ -1,21 +1,28 @@
 #!/bin/bash
 
+if [ -z "$2" ]
+then
+    instance=apple
+else
+    instance=$2
+fi
+
 case $1 in
 start)
-    sudo lxc start $2
+    sudo lxc start $instance
     ;;
 stop)
-    sudo lxc stop $2
+    sudo lxc stop $instance
     ;;
 login)
-    sudo lxc exec $2 -- sudo --user ubuntu --login
+    sudo lxc exec $instance -- sudo --user ubuntu --login
     ;;
 restore)
-    sudo lxc restore $2 updates
+    sudo lxc restore $instance updates
     ;;
 snapshot)
-    sudo lxc delete $2/updates
-    sudo lxc snapshot $2 updates
+    sudo lxc delete $instance/updates
+    sudo lxc snapshot $instance updates
     ;;
 list)
     instances=$(sudo lxc list -c n -f csv)
