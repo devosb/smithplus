@@ -72,7 +72,10 @@ def check_cmap(charset, font_filename, ucd):
     # output characters that are in the charset
     # but are missing from the font
     for char in sorted(charset - codepoints):
-        name = ucd.get(char, 'na')
+        try:
+            name = ucd.get(char, 'na')
+        except KeyError:
+            name = '(Unknown)'
         print(f'U+{char:04X} {name}')
 
 
