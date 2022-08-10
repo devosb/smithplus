@@ -141,7 +141,7 @@ if [ "$1" == "make" ]
 then
     if [ -d source/masters ]
     then
-        for dspace in source/*Make.designspace
+        for dspace in source/*-VF.designspace
         do
             if [ -f $dspace ]
             then
@@ -153,15 +153,15 @@ then
                 if [ "$2" == "ttf" -o -z "$2" ]
                 then
                     echo "building ttf instance fonts from $dspace"
-                    fontmake -m $dspace --keep-overlaps -i -o ttf
+                    fontmake -m $dspace --keep-overlaps --check-compatibility -i -o ttf
                 fi
                 if [ "$2" == "variable" -o -z "$2" ]
                 then
                     echo "building variable font from $dspace"
-                    familypath=${dspace%Make.designspace}
+                    familypath=${dspace%-VF.designspace}
                     familyname=${familypath#source/}
                     vardir=variable_ttf
-                    mkdir $vardir
+                    mkdir -p $vardir
                     fontpath=${vardir}/${familyname}-VF.ttf
                     fontmake -m $dspace --output-path $fontpath -o variable
                 fi
