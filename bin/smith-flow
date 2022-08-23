@@ -188,9 +188,9 @@ then
     exit 0
 fi
 
-if [ "$1" == "install" ]
+if [ "$1" == "install" -o "$1" == "windows" -o "$1" == "apple" ]
 then
-    /bin/cp -p -v results/*.ttf ~/.fonts
+    /bin/cp -p -v results/*.ttf /mnt/fonts
     /bin/cp -p -v results/*.ttf ~/guest
     for output in *_?tf
     do
@@ -210,25 +210,52 @@ then
         fi
     done
 
-    exit 0
+    # ftml
+    if [ "$1" != "apple" ]
+    then
+        pushd tests
+        psfcheckftml
+        for ftml in *.ftml
+        do
+            # check for valid files
+            xmllint --noout --dtdvalid $HOME/builds/ftml/FTML.dtd $ftml
+            if [ $? -gt 0 ]
+            then
+                echo "ftml file $ftml is invalid"
+            fi
+
+            # produce document
+            ftml2odt ${ftml%.ftml}
+        done
+        popd
+    fi
+
+    if [ "$1" == "install" ]
+    then
+        exit 0
+    fi
 fi
 
 if [ "$1" == "windows" ]
 then
-    web=$HOME/guest/$prj-web
+    web=$HOME/guest/web
     rm -rf $web
     mkdir $web
     cp -a -v web/* $web
 
+    host=${PWD/ci//}
+
     pushd tests
 
     # windows apps
-    /bin/cp -p -v *.indd *.docx ~/guest
+    /bin/cp -p -v *.indd *.odt *.docx ~/guest
 
     # InDesign
     folder="$HOME/guest/Document Fonts"
     rm -rf "$folder"
     mkdir "$folder"
+    cp -p -v ../dev/*.ttf "$folder"
+    cp -p -v $host/references/Noto*.ttf "$folder"
     cp -p -v ../results/*.ttf "$folder"
 
     # plain text
@@ -246,20 +273,6 @@ then
         popd
     fi
 
-    # ftml
-    psfcheckftml
-    for ftml in *.ftml
-    do
-        # check for valid files
-        xmllint --noout --dtdvalid $HOME/builds/ftml/FTML.dtd $ftml
-        if [ $? -gt 0 ]
-        then
-            echo "ftml file $ftml is invalid"
-        fi
-
-        # produce document
-        ftml2odt ${ftml%.ftml}
-    done
     popd
 
     exit 0
@@ -267,6 +280,11 @@ fi
 
 if [ "$1" == "apple" ]
 then
+    ssh-add -l
+    if [ $? -gt 0 ]
+    then
+        ssh-add ~/.ssh/id_ed25519_home
+    fi
     chmod -R go+Xr web
     rsync -v -a --delete web/ nrsi.sil.org:/var/www/fonts/
 
@@ -275,9 +293,9 @@ fi
 
 if [ "$1" == "data" ]
 then
-    if [ -x tools/genftmlfiles.sh ]
+    if [ -x makeftml ]
     then
-        ./tools/genftmlfiles.sh
+        ./makeftml
     fi
 
     pushd tests

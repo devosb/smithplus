@@ -1,5 +1,16 @@
 #!/bin/bash
 
 prj=$(basename $PWD)
-echo "now running ../rrun-$prj"
-../rrun-$prj
+cmd=../rrun-$prj
+dir=/mnt/builds/$prj
+if [ -x $cmd ]
+then
+    echo "now running $cmd"
+    $cmd
+else
+    if [ -d $dir ]
+    then
+        echo "now running rsync $dir"
+        rsync -a -v $dir/ .
+    fi
+fi
