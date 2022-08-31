@@ -190,8 +190,8 @@ fi
 
 if [ "$1" == "install" -o "$1" == "windows" -o "$1" == "apple" ]
 then
-    /bin/cp -p -v results/*.ttf /mnt/fonts
-    /bin/cp -p -v results/*.ttf ~/guest
+    cp -v results/*.ttf /mnt/fonts
+    cp -v results/*.ttf ~/guest
     for output in *_?tf
     do
         if [ ! -d $output ]
@@ -199,14 +199,14 @@ then
             continue
         fi
         mkdir ~/guest/$output
-        cp -p -v $output/*.?tf ~/guest/$output
+        cp -v $output/*.?tf ~/guest/$output
     done
 
     for www in web woff
     do
         if [ -d results/$www ]
         then
-            cp -p -v results/$www/*.woff* web
+            cp -v results/$www/*.woff2 dev/web
         fi
     done
 
@@ -238,31 +238,34 @@ fi
 
 if [ "$1" == "windows" ]
 then
-    web=$HOME/guest/web
-    rm -rf $web
-    mkdir $web
-    cp -a -v web/* $web
+    # web=$HOME/guest/web
+    # rm -rf $web
+    # mkdir $web
+    # cp -a -v web/* $web
+    for format in web sfm
+    do
+        rsync -v -a --delete dev/$format $HOME/guest
+    done
 
     host=${PWD/ci//}
-
     pushd tests
 
     # windows apps
-    /bin/cp -p -v *.indd *.odt *.docx ~/guest
+    cp -v *.indd *.odt *.docx ~/guest
 
     # InDesign
     folder="$HOME/guest/Document Fonts"
     rm -rf "$folder"
     mkdir "$folder"
-    cp -p -v ../dev/*.ttf "$folder"
-    cp -p -v $host/references/Noto*.ttf "$folder"
-    cp -p -v ../results/*.ttf "$folder"
+    cp -v ../dev/*.ttf "$folder"
+    cp -v $host/references/Noto*.ttf "$folder"
+    cp -v ../results/*.ttf "$folder"
 
     # plain text
     if [ -d generated ]
     then
         pushd generated
-        for txt_file in *.txt ../*.txt ../../dev/*.txt
+        for txt_file in *.txt ../*.txt ../../dev/txt/*.txt
         do
             if [ -f $txt_file ]
             then
@@ -285,8 +288,8 @@ then
     then
         ssh-add ~/.ssh/id_ed25519_home
     fi
-    chmod -R go+Xr web
-    rsync -v -a --delete web/ nrsi.sil.org:/var/www/fonts/
+    chmod -R go+Xr dev/web
+    rsync -v -a --delete dev/web/ nrsi.sil.org:/var/www/fonts/
 
     exit 0
 fi
@@ -296,7 +299,12 @@ then
     if [ -x makeftml ]
     then
         ./makeftml
+        mkdir -p dev/{txt,web,sfm}
     fi
+
+    pushd web
+    cp -v *.html *.css ../dev/web
+    popd
 
     pushd tests
     /bin/rm -rf generated
@@ -314,7 +322,7 @@ then
         if [ -f $ftml ]
         then
             ftml2txt $ftml
-            cp ../dev/${ftml%.ftml}.txt generated/${ftml%.ftml}.htxt
+            cp ../dev/txt/${ftml%.ftml}.txt generated/${ftml%.ftml}.htxt
         fi
     done
 
@@ -340,10 +348,10 @@ fi
 if [ "$1" == "reference" ]
 then
     pushd dev
-    cp -p *.ttf old
+    cp *.ttf old
     for ttf in *.ttf
     do
-        cp -p ~/guest/$ttf .
+        cp ~/guest/$ttf .
     done
     ls -l *.ttf
     popd

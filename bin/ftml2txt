@@ -21,16 +21,22 @@ def main():
         (base_filename, ext) = os.path.splitext(ftml_filename)
 
         # Write plain text file
-        text_filename = f'../dev/{base_filename}.txt'
+        text_filename = f'../dev/txt/{base_filename}.txt'
         with open(text_filename, 'w') as text_file:
             text = ftml_data.text()
             text_file.write(text)
 
         # Write HTML file
-        html_filename = f'../web/{base_filename}.html'
+        html_filename = f'../dev/web/{base_filename}.html'
         with open(html_filename, 'w') as html_file:
             html = ftml_data.html()
             html_file.write(html)
+
+        # Write SFM file
+        sfm_filename = f'../dev/sfm/{base_filename}.sfm'
+        with open(sfm_filename, 'w') as sfm_file:
+            sfm = ftml_data.sfm()
+            sfm_file.write(sfm)
 
 
 class FTML:
@@ -70,7 +76,7 @@ class FTML:
         return text
 
     def html(self):
-        """Format data for a plain text file"""
+        """Format data for a HTML file"""
         html = """<!DOCTYPE html>
 <html>
 <head>
@@ -85,6 +91,13 @@ class FTML:
 </html>
 """
         return html
+
+    def sfm(self):
+        """Format data for a SFM file"""
+        sfm = ''
+        for testgroup in self.testgroups:
+            sfm += testgroup.sfm()
+        return sfm
 
 
 class TestGroup:
@@ -116,6 +129,13 @@ class TestGroup:
             html += test.html()
         return html
 
+    def sfm(self):
+        """Format data for a SFM file"""
+        sfm = '\\s ' + self.data + '\n'
+        for test in self.tests:
+            sfm += test.sfm()
+        return sfm
+
 
 class Test:
     """Test in an FTML file"""
@@ -135,6 +155,10 @@ class Test:
         local = f'<p>{self.data}</p>\n'
         woff2 = f'<p class=dev>{self.data}</p>\n'
         return label + local + woff2
+
+    def sfm(self):
+        """Format data for a SFM file"""
+        return('\\v 1 ' + self.label + ': ' + self.comment + ' ' + self.data + '\n')
 
 
 if __name__ == "__main__":
