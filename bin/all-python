@@ -15,10 +15,10 @@ do
         then
             suffix=''
         fi
-        for upgrade in .*/${level}upgrade${suffix}.bash
+        for upgrade in $SMITHHOME/*/upgrade${level}${suffix}.bash
         do
             lib=$(dirname ${upgrade})
-            src=${lib#.}
+            src=$(basename ${lib})
             if [ -f ${src}/setup.py ]
             then
                 echo ${src}

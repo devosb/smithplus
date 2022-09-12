@@ -4,7 +4,6 @@ locations=host
 if [ $HOSTNAME = apple ]
 then
     locations=guest
-    # ssh-add $HOME/.ssh/id_ed25519_world
 fi
 
 for location in all $locations
@@ -14,12 +13,12 @@ do
     then
         suffix=''
     fi
-    for update in .*/update${suffix}.bash
+    for update in $SMITHHOME/*/update${suffix}.bash
     do
         lib=$(dirname ${update})
-        src=${lib#.}
+        src=$(basename ${lib})
         pushd ${src}
-        bash ../${update}
+        bash ${update}
         popd
     done
 done

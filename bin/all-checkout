@@ -1,23 +1,14 @@
 #/bin/bash
 
-locations=host
-if [ $HOSTNAME = apple ]
-then
-    locations=guest
-fi
-
-for location in all $locations
+for location in all host
 do
     suffix=-$location
     if [ $location = all ]
     then
         suffix=''
     fi
-    for checkout in .*/checkout${suffix}.bash
+    for checkout in $SMITHHOME/*/checkout${suffix}.bash
     do
-        lib=$(dirname ${checkout})
-        src=${lib#.}
-        echo rm -rf $src
-        echo bash $checkout
+        echo bash ${checkout}
     done
 done

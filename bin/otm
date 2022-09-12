@@ -1,4 +1,4 @@
 #!/bin/bash
 
-export LD_LIBRARY_PATH=$HOME/builds/icu/source/lib
+export LD_LIBRARY_PATH=$HOME/src/icu/source/lib
 OTM_89 "$@"

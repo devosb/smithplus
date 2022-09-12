@@ -1,9 +1,9 @@
 #/bin/bash
 
-for update in .*/update.bash
+for update in $SMITHHOME/*/update.bash
 do
     lib=$(dirname ${update})
-    src=${lib#.}
+    src=$(basename ${lib})
     pushd ${src}
     git status
     gitk
