@@ -10,23 +10,33 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(description='Check character inventory of a TTF font')
-    parser.add_argument('charset', help='Character set to check')
-    parser.add_argument('font', help='TTF font files to process', nargs='+')
+    parser.add_argument('subset', help='(subset) Character set to check')
+    parser.add_argument('full', help='(full) TTF font files to process', nargs='+')
     parser.add_argument('--version', action='version', version='%(prog)s ' + '0.1')
     args = parser.parse_args()
 
-    if args.charset.endswith('.nam'):
-        if os.path.exists(args.charset):
-            charset = get_namelist(args.charset)
-        else:
-            print(f'name file {args.charset} does not exist')
-            sys.exit(1)
-    else:
-        charset = get_charset(args.charset)
+
+    subset = get_codepoints(args.subset)
     ucd = UCD()
-    for font_filename in args.font:
-        print(f'{font_filename}:')
-        check_cmap(charset, font_filename, ucd)
+    for item in args.full:
+        print(f'{item}:')
+        full = get_codepoints(item)
+        print_differences(subset, full, ucd)
+
+
+def get_codepoints(item):
+    if item.endswith('.nam'):
+        if os.path.exists(item):
+            codepoints = get_namelist(item)
+        else:
+            print(f'name file {item} does not exist')
+            sys.exit(1)
+    if item.endswith('.ttf'):
+        codepoints = get_cmap(item)
+    else:
+        codepoints = get_charset(item)
+
+    return codepoints
 
 
 def get_charset(charset_name):
@@ -59,7 +69,7 @@ def get_namelist(namefile_filename):
     return codepoints
 
 
-def check_cmap(charset, font_filename, ucd):
+def get_cmap(font_filename):
     # load cmap from the font
     font = TTFont(font_filename)
     cmap = font.getBestCmap()
@@ -69,9 +79,13 @@ def check_cmap(charset, font_filename, ucd):
     for codepoint, glyph_name in cmap.items():
         codepoints.add(codepoint)
 
+    return codepoints
+
+
+def print_differences(subset, full, ucd):
     # output characters that are in the charset
     # but are missing from the font
-    for char in sorted(charset - codepoints):
+    for char in sorted(subset - full):
         try:
             name = ucd.get(char, 'na')
         except KeyError:
