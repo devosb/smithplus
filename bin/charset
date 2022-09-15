@@ -3,6 +3,8 @@
 import importlib.util
 from fontTools.ttLib import TTFont
 from palaso.unicode.ucd import UCD
+import cssutils
+import re
 import sys
 import os
 import argparse
@@ -10,11 +12,10 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(description='Check character inventory of a TTF font')
-    parser.add_argument('subset', help='(subset) Character set to check')
-    parser.add_argument('full', help='(full) TTF font files to process', nargs='+')
+    parser.add_argument('subset', help='Character set to check')
+    parser.add_argument('full', help='TTF font files to process', nargs='+')
     parser.add_argument('--version', action='version', version='%(prog)s ' + '0.1')
     args = parser.parse_args()
-
 
     subset = get_codepoints(args.subset)
     ucd = UCD()
@@ -31,8 +32,10 @@ def get_codepoints(item):
         else:
             print(f'name file {item} does not exist')
             sys.exit(1)
-    if item.endswith('.ttf'):
+    elif item.endswith('.ttf') or item.endswith('.woff2'):
         codepoints = get_cmap(item)
+    elif item.endswith('.css'):
+        codepoints = get_range(item)
     else:
         codepoints = get_charset(item)
 
@@ -66,6 +69,34 @@ def get_namelist(namefile_filename):
             codepoints.add(codepoint)
 
     # return the list of characters in the name file
+    return codepoints
+
+
+def get_range(css_filename):
+    # CSS file
+    codepoints = set()
+    find_unicode_range = re.compile(r'u\+([0-9A-Fa-f]+)-?([0-9A-Fa-f]+)?')
+    sheet = cssutils.parseFile(css_filename)
+    for rule in sheet:
+        if rule.type != rule.FONT_FACE_RULE:
+            continue
+        lines = rule._getCssText()
+        for line in lines.splitlines():
+            line_content = line.strip()
+            if line_content.startswith('unicode-range:'):
+                for unicode_range in line_content.split():
+                    m = find_unicode_range.match(unicode_range)
+                    if not m:
+                        continue
+                    start = int(m.group(1), 16)
+                    if m.lastindex > 1:
+                        # range of codepoints
+                        end = int(m.group(2), 16)
+                        codepoints.update(set(range(start, end+1)))
+                    else:
+                        # single codepoint
+                        codepoints.add(start)
+
     return codepoints
 
 
