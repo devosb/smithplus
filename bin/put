@@ -1,5 +1,18 @@
 #!/bin/bash
 
 prj=$(basename $PWD)
-echo "now running ../docs-$prj"
-../docs-$prj
+cmd=../docs-$prj
+upgrade=$SMITHHOME/$prj/upgrade*.bash
+if [ -x $cmd ]
+then
+    echo "now running $cmd"
+    $cmd
+else
+    if [ -f $upgrade ]
+    then
+        umask 022
+        bash $upgrade
+    else
+        echo "upgrade script $upgrade does not exist"
+    fi
+fi
