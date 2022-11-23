@@ -13,16 +13,25 @@ import argparse
 def main():
     parser = argparse.ArgumentParser(description='Check character inventory of a TTF font')
     parser.add_argument('subset', help='Character set to check')
-    parser.add_argument('full', help='TTF font files to process', nargs='+')
+    parser.add_argument('full', help='TTF font files to process', nargs='*')
     parser.add_argument('--version', action='version', version='%(prog)s ' + '0.1')
     args = parser.parse_args()
 
+
     subset = get_codepoints(args.subset)
     ucd = UCD()
-    for item in args.full:
-        print(f'{item}:')
-        full = get_codepoints(item)
-        print_differences(subset, full, ucd)
+
+    if len(args.full) == 0:
+        print_differences(subset, set(), ucd)
+    else:
+        multiple = True
+        if len(args.full) == 1:
+            multiple = False
+        for item in args.full:
+            if multiple:
+                print(f'{item}:')
+            full = get_codepoints(item)
+            print_differences(subset, full, ucd)
 
 
 def get_codepoints(item):

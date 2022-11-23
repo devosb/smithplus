@@ -317,28 +317,14 @@ then
         fi
     done
 
+    ftml2txt $HOME/script/SP1 *.ftml
     for ftml in *.ftml
     do
         if [ -f $ftml ]
         then
-            ftml2txt $ftml
             cp ../dev/txt/${ftml%.ftml}.txt generated/${ftml%.ftml}.htxt
         fi
     done
-
-    if [ -f ../source/master.gdl ]
-    then
-        pushd generated
-        for txt_file in *.txt ../*.txt ../../dev/*.txt
-        do
-            txt=$(basename $txt_file)
-            for nf in nfc nfd
-            do
-                txtconv -i $txt_file -o ${txt%.txt}-$nf.txt -$nf -nobom
-            done
-        done
-        popd
-    fi
 
     popd
 
@@ -351,7 +337,7 @@ then
     cp *.ttf old
     for ttf in *.ttf
     do
-        cp ~/guest/$ttf .
+        cp -p ~/guest/$ttf .
     done
     ls -l *.ttf
     popd
