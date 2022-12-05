@@ -32,19 +32,7 @@ do
         done
     done
 done
-
-pushd /run/shm
-echo shebang
-grep /usr/bin/python ~/.local/bin/*
-echo py2
-grep /usr/bin/python ~/.local/bin/* | grep -v /usr/bin/python3
-ls -lt ~/.local/bin/ /usr/local/bin/ ~/builds/fontvalidator/bin
-find /usr/local/lib -name fontforge* -exec ls -l {} \;
-find /usr/local/lib -name psMat* -exec ls -l {} \;
-popd
-
-# Use the latest fontTools
-pip3 show fonttools
+sudo ldconfig
 
 # Install fontmake (again) in a virtual environment
 rm -rf fourplus
@@ -52,3 +40,13 @@ python3 -m venv fourplus
 source fourplus/bin/activate
 pip3 install fontmake
 pip3 install MutatorMath
+
+# Show build timestamps
+pushd /run/shm
+ls -lt ~/.local/bin/ /usr/local/bin/ ~/builds/fontvalidator/bin
+find /usr/local/lib -name fontforge* -exec ls -l {} \;
+find /usr/local/lib -name psMat* -exec ls -l {} \;
+popd
+
+# Use the latest fontTools
+pip3 show fonttools

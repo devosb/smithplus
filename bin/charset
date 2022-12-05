@@ -12,26 +12,32 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(description='Check character inventory of a TTF font')
+    parser.add_argument('-c', '--css', help='Output in CSS Unicode range format', action='store_true')
     parser.add_argument('subset', help='Character set to check')
-    parser.add_argument('full', help='TTF font files to process', nargs='*')
+    parser.add_argument('item', help='TTF font files to process', nargs='*')
     parser.add_argument('--version', action='version', version='%(prog)s ' + '0.1')
     args = parser.parse_args()
-
 
     subset = get_codepoints(args.subset)
     ucd = UCD()
 
-    if len(args.full) == 0:
-        print_differences(subset, set(), ucd)
-    else:
-        multiple = True
-        if len(args.full) == 1:
-            multiple = False
-        for item in args.full:
-            if multiple:
-                print(f'{item}:')
-            full = get_codepoints(item)
-            print_differences(subset, full, ucd)
+    items = args.item
+    if len(items) == 0:
+        # only the subset has been specified, so compare the
+        # subset to an empty set to see everything in the subset
+        items = ['']
+
+    multiple = True
+    if len(items) == 1:
+        multiple = False
+    for item in items:
+        if multiple:
+            print(f'{item}:')
+        differences = sorted(subset - get_codepoints(item))
+        if args.css:
+            output_css(differences)
+        else:
+            output_list(differences, ucd)
 
 
 def get_codepoints(item):
@@ -45,6 +51,8 @@ def get_codepoints(item):
         codepoints = get_cmap(item)
     elif item.endswith('.css'):
         codepoints = get_range(item)
+    elif item == '':
+        codepoints = set()
     else:
         codepoints = get_charset(item)
 
@@ -113,24 +121,43 @@ def get_cmap(font_filename):
     # load cmap from the font
     font = TTFont(font_filename)
     cmap = font.getBestCmap()
-
-    # collect the codepoints in the font
-    codepoints = set()
-    for codepoint, glyph_name in cmap.items():
-        codepoints.add(codepoint)
-
+    codepoints = set(cmap.keys())
     return codepoints
 
 
-def print_differences(subset, full, ucd):
-    # output characters that are in the charset
-    # but are missing from the font
-    for char in sorted(subset - full):
+def output_list(differences, ucd):
+    for char in differences:
         try:
             name = ucd.get(char, 'na')
         except KeyError:
             name = '(Unknown)'
         print(f'U+{char:04X} {name}')
+
+
+def output_css(differences):
+    # Code gratefully copied from https://github.com/LucasFonts/css-unicode-range
+    ranges = []
+    r = []
+    for c in differences:
+        if r:
+            if c - 1 == r[-1]:
+                r.append(c)
+            else:
+                ranges.append(r)
+                r = [c]
+        else:
+            r = [c]
+    if r:
+        ranges.append(r)
+    ur = []
+    for r in ranges:
+        if len(r) == 1:
+            ur.append(f"U+{r[0]:04X}")
+        else:
+            u0 = min(r)
+            u1 = max(r)
+            ur.append(f"U+{u0:04X}-{u1:04X}")
+    print("unicode-range: " + ", ".join(ur) + ";")
 
 
 if __name__ == "__main__":
