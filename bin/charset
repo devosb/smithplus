@@ -4,6 +4,7 @@ import importlib.util
 from fontTools.ttLib import TTFont
 from palaso.unicode.ucd import UCD
 import cssutils
+from collections import OrderedDict
 import re
 import sys
 import os
@@ -12,15 +13,17 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(description='Check character inventory of a TTF font')
+    parser.add_argument('-b', '--block', help='Group ranges by block', action='store_true')
     parser.add_argument('-c', '--css', help='Output in CSS Unicode range format', action='store_true')
     parser.add_argument('subset', help='Character set to check')
     parser.add_argument('item', help='TTF font files to process', nargs='*')
     parser.add_argument('--version', action='version', version='%(prog)s ' + '0.1')
     args = parser.parse_args()
 
-    subset = get_codepoints(args.subset)
     ucd = UCD()
+    block_names = get_block_names()
 
+    subset = get_codepoints(args.subset)
     items = args.item
     if len(items) == 0:
         # only the subset has been specified, so compare the
@@ -35,9 +38,28 @@ def main():
             print(f'{item}:')
         differences = sorted(subset - get_codepoints(item))
         if args.css:
-            output_css(differences)
+            output_css(differences, ucd, block_names)
+        elif args.block:
+            output_block(differences, ucd, block_names)
         else:
             output_list(differences, ucd)
+
+
+def get_block_names():
+    names = dict()
+
+    home = os.environ['HOME']
+    value_aliases = 'pub/doc/Unicode/ucd/tus/PropertyValueAliases.txt'
+    value_aliases_filename = os.path.join(home, value_aliases)
+    with open(value_aliases_filename) as value_aliases_file:
+        for line in value_aliases_file:
+            if line.startswith('blk;'):
+                alias = line.split(';')
+                code = alias[1].strip()
+                name = alias[2].strip()
+                names[code] = name
+
+    return names
 
 
 def get_codepoints(item):
@@ -61,7 +83,7 @@ def get_codepoints(item):
 
 def get_charset(charset_name):
     # file containing the charset
-    home = os.environ["HOME"]
+    home = os.environ['HOME']
     charsets = 'builds/pyfontaine/fontaine/charsets/internals'
     charset_filename = os.path.join(home, charsets, charset_name + '.py')
 
@@ -134,11 +156,38 @@ def output_list(differences, ucd):
         print(f'U+{char:04X} {name}')
 
 
-def output_css(differences):
-    # Code gratefully copied from https://github.com/LucasFonts/css-unicode-range
-    ranges = []
+def output_css(differences, ucd, block_names):
+    output_ranges(differences, ucd, None, 'unicode-range: ', '-', ';')
+
+
+def output_block(differences, ucd, block_names):
+    output_ranges(differences, ucd, block_names, '|', '..U+', '')
+
+
+def output_ranges(differences, ucd, block_names, prefix, sep, suffix):
+    # Code (except for code involving blocks)
+    # gratefully copied from https://github.com/LucasFonts/css-unicode-range
+    blocks = OrderedDict()
+    b = ''
     r = []
     for c in differences:
+        if block_names:
+            try:
+                block = ucd.get(c, 'blk')
+            except KeyError:
+                block = '(Unknown)'
+        else:
+            block = 'SquashBlock'
+
+        if block != b:
+            if r:
+                ranges.append(r)
+            if b:
+                blocks[b] = ranges
+            ranges = []
+            r = []
+            b = block
+
         if r:
             if c - 1 == r[-1]:
                 r.append(c)
@@ -149,16 +198,23 @@ def output_css(differences):
             r = [c]
     if r:
         ranges.append(r)
-    ur = []
-    for r in ranges:
-        if len(r) == 1:
-            ur.append(f"U+{r[0]:04X}")
+        blocks[block] = ranges
+
+    for block_code, block_range in blocks.items():
+        ur = []
+        for r in block_range:
+            if len(r) == 1:
+                ur.append(f'U+{r[0]:04X}')
+            else:
+                u0 = min(r)
+                u1 = max(r)
+                ur.append(f'U+{u0:04X}{sep}{u1:04X}')
+        if block_names:
+            block_name = block_names.get(block_code, block_code).replace('_', ' ')
         else:
-            u0 = min(r)
-            u1 = max(r)
-            ur.append(f"U+{u0:04X}-{u1:04X}")
-    print("unicode-range: " + ", ".join(ur) + ";")
+            block_name = ''
+        print(f'{block_name}{prefix}' + ', '.join(ur) + suffix)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

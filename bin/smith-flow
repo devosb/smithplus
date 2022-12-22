@@ -345,24 +345,6 @@ then
     exit 0
 fi
 
-if [ "$1" == "wordlists" ]
-then
-    cd tests
-    if [ -f wiki.txt ]
-    then
-        mv wiki.txt wiki.text
-        mv dict.txt dict.text
-        echo "large wordlists disabled"
-    else
-        mv wiki.text wiki.txt
-        mv dict.text dict.txt
-        echo "large wordlists enabled"
-    fi
-    cd ..
-
-    exit 0
-fi
-
 if [ "$1" == "update" ]
 then
     gdcsv
