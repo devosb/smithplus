@@ -213,6 +213,7 @@ then
     # ftml
     if [ "$1" != "apple" ]
     then
+        # FTML files
         pushd tests
         psfcheckftml
         for ftml in *.ftml
@@ -228,6 +229,26 @@ then
             ftml2odt ${ftml%.ftml}
         done
         popd
+
+        # TypeTuner files
+        if [ -d source/typetuner ]
+        then
+            pushd source/typetuner
+            for tag in all set
+            do
+                dtd=feat_${tag}.dtd
+                for xml in feat_${tag}*.xml
+                do
+                    echo xmllint --noout --dtdvalid $dtd $xml
+                    xmllint --noout --dtdvalid $dtd $xml
+                    if [ $? -gt 0 ]
+                    then
+                        echo "TypeTuner XML file $xml is invalid"
+                    fi
+                done
+            done
+            popd
+        fi
     fi
 
     if [ "$1" == "install" ]
