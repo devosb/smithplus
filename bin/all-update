@@ -1,7 +1,7 @@
 #/bin/bash
 
 locations=host
-if [ $HOSTNAME = apple ]
+if [ $HOSTNAME = apple -o $HOSTNAME = fruit ]
 then
     locations=guest
 fi

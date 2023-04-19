@@ -3,8 +3,10 @@
 umask 022
 sudo echo root
 
+pip3 install --upgrade pip wheel setuptools
+
 locations=host
-if [ $HOSTNAME = apple ]
+if [ $HOSTNAME = apple -o $HOSTNAME = fruit ]
 then
     locations=guest
 fi

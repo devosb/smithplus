@@ -1,4 +1,4 @@
-python3 -m pip install --user .
+python3 -m pip install --user --use-pep517 .
 
 # python3 setup.py develop --user
 

@@ -338,7 +338,7 @@ then
         fi
     done
 
-    ftml2txt $HOME/script/SP1 *.ftml
+    ftml2txt -s $HOME/script/SP1 *.ftml
     for ftml in *.ftml
     do
         if [ -f $ftml ]
