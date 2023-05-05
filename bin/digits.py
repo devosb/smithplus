@@ -2,6 +2,8 @@
 
 from fontParts.world import *
 from palaso.unicode.ucd import get_ucd
+from pathlib import Path
+import os
 import toml
 import argparse
 
@@ -9,8 +11,8 @@ import argparse
 def main():
     parser = argparse.ArgumentParser(description='Add non-ABS digits to an ABS font')
     parser.add_argument('-c', '--config', help='configuration file to use')
-    parser.add_argument('abs', help='ABS font to add to')
-    parser.add_argument('pub', help='Primary font for publishing')
+    parser.add_argument('abs', help='ABS fonts to add to')
+    parser.add_argument('pub', help='Primary fonts for publishing')
     parser.add_argument('--version', action='version', version='%(prog)s 0.1')
     args = parser.parse_args()
 
@@ -19,16 +21,38 @@ def main():
         config_file = args.config
     config = toml.load(config_file)
 
-    # Open UFO
-    abs = OpenFont(args.abs)
-    pub = OpenFont(args.pub)
+    for pair in config['weights']:
+        # Open UFOs
+        abs = OpenFont(args.abs + pair[0])
+        pub = OpenFont(args.pub + pair[1])
 
-    transfer(config, abs, pub)
+        # Copy digits
+        transfer(config, abs, pub)
 
-    # Save UFO
-    abs.changed()
-    abs.save()
-    abs.close()
+        # Save ABS UFO
+        abs.changed()
+        abs.save()
+        abs.close()
+
+    # Build fonts
+    os.system('smith distclean; smith configure; smith build')
+
+    # Configure fonts
+    name = config['name']
+    version = config['version']
+    outdir = 'results/'
+    p = Path(outdir)
+    for built in p.glob('*.ttf'):
+        font = str(built).removeprefix(outdir)
+        not_name = font.split('-')[1]
+        output = f'{name}-{not_name}'
+
+        cmd = f'typetuner -o {output} applyset feat_set.xml {built}'
+        os.system(cmd)
+        cmd = f'ttfname -n {name} {output} ../{output}'
+        os.system(cmd)
+        cmd = f'ttfsetver {version} ../{output} {output}'
+        os.system(cmd)
 
 
 def transfer(config, abs, pub):
