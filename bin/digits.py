@@ -37,6 +37,7 @@ def transfer(config, abs, pub):
     zero = config['zero']
     pub_digits = find_names(pub, zero)
     pub_width = find_width(pub, pub_digits)
+    pub_descender = find_descender(pub, pub_digits)
 
     # Scaling
     scale_upm = 1
@@ -78,8 +79,14 @@ def transfer(config, abs, pub):
             abs_digits = [abs_digit + suffix for abs_digit in abs_base_digits]
             abs_width = find_width(abs, abs_digits)
 
-            # Scale needed for the publishing font digits to match the width of the ABS digits
+            # Scale publishing font digits to match the width of the ABS digits
             scale_width = abs_width / pub_width
+
+            # Overall scale to apply to the glyph
+            scale = scale_upm * scale_width
+
+            # Shift digits up to account for descenders
+            move = -pub_descender * scale
 
             for pub_digit, abs_digit in zip(pub_digits, abs_digits):
                 abs_glyph = abs[abs_digit]
@@ -93,7 +100,10 @@ def transfer(config, abs, pub):
                 # Transfer ink for the digit
                 for contour in pub_glyph.contours:
                     ink = contour.copy()
-                    ink.scaleBy(scale_upm * scale_width)
+                    ink.scaleBy(scale)
+                    if size != '':
+                        # Don't move the encoded digits up
+                        ink.moveBy((0, move))
                     abs_glyph.appendContour(ink)
 
 
@@ -113,6 +123,15 @@ def find_width(font, names):
         width = glyph.width
         max_width = max(max_width, width)
     return max_width
+
+
+def find_descender(font, names):
+    min_descender = 0
+    for name in names:
+        glyph = font[name]
+        xmin, ymin, xmax, ymax = glyph.bounds
+        min_descender = min(min_descender, ymin)
+    return min_descender
 
 
 if __name__ == "__main__":
