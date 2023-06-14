@@ -3,6 +3,7 @@
 umask 022
 sudo echo root
 
+rm -rf $HOME/.local/{bin,lib}
 pip3 install --upgrade pip wheel setuptools
 
 locations=host
@@ -51,4 +52,4 @@ find /usr/local/lib -name psMat* -exec ls -l {} \;
 popd
 
 # Use the latest fontTools
-pip3 show fonttools
+/home/ubuntu/.local/bin/pip3 show fonttools

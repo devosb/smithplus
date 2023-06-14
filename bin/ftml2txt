@@ -69,7 +69,15 @@ class FTML:
             for test in testgroup.iter('test'):
                 label = test.get('label')
                 comment = test.findtext('comment', '')
-                data = test.find('string').text
+                raw_data = test.find('string').text
+                char_data = unikey.modify(raw_data)
+                data = ''
+                for char in char_data:
+                    codepoint = ord(char)
+                    if codepoint < 0x20 or 0x2028 <= codepoint <= 0x2029:
+                        pass
+                    else:
+                        data += char
                 tests.add_test(label, comment, data)
 
     def add_testgroup(self, data):
@@ -173,7 +181,7 @@ class Test:
     def __init__(self, label, comment, data):
         self.label = label
         self.comment = comment
-        self.data = unikey.modify(data)
+        self.data = data
 
     def text(self):
         """Format data for a plain text file"""

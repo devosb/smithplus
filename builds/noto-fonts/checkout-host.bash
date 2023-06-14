@@ -1,1 +1,1 @@
-git clone https://github.com/googlefonts/noto-fonts.git /opt/bobby/builds/noto-fonts
+git clone https://github.com/notofonts/notofonts.github.io.git /opt/bobby/builds/noto-fonts

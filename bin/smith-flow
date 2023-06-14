@@ -46,6 +46,12 @@ then
     fi
 fi
 
+if [ "$1" == "diff" ]
+then
+    diffenator2 diff -fb references/${prj^}-Regular.ttf -fa results/${prj^}-Regular.ttf --user-wordlist dev/wordlist.txt -o ~/guest
+    exit 0
+fi
+
 if [ "$1" == "ots" ]
 then
     for output in *_?tf
@@ -148,7 +154,7 @@ then
                 if [ "$2" == "otf" -o -z "$2" ]
                 then
                     echo "building otf instance fonts from $dspace"
-                    fontmake -m $dspace --keep-overlaps -i -o otf
+                    fontmake -m $dspace --keep-overlaps --check-compatibility -i -o otf
                 fi
                 if [ "$2" == "ttf" -o -z "$2" ]
                 then
@@ -285,8 +291,7 @@ then
     # plain text
     if [ -d generated ]
     then
-        pushd generated
-        for txt_file in *.txt ../*.txt ../../dev/txt/*.txt
+        for txt_file in *.txt generated/*.txt ../dev/txt/*.txt
         do
             if [ -f $txt_file ]
             then
@@ -294,7 +299,6 @@ then
                 unix2dos -n $txt_file ~/guest/$txt
             fi
         done
-        popd
     fi
 
     popd
@@ -344,6 +348,24 @@ then
         if [ -f $ftml ]
         then
             cp ../dev/txt/${ftml%.ftml}.txt generated/${ftml%.ftml}.htxt
+        fi
+    done
+
+    cp /dev/null ../dev/wordlist.txt
+
+    for txt_file in *.txt generated/*.txt
+    do
+        if [ -f $txt_file ]
+        then
+            cat $txt_file | sed 's/ /\n/g' | sed 's/,//g' >> ../dev/wordlist.txt
+        fi
+    done
+
+    for txt_file in ../dev/txt/*.txt
+    do
+        if [ -f $txt_file ]
+        then
+            cat $txt_file | sed 's/,//g' >> ../dev/wordlist.txt
         fi
     done
 

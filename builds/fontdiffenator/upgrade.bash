@@ -1,3 +1,4 @@
+pip3 install --upgrade Pillow
 python3 -m pip install --user .
 
 # python3 setup.py develop --user
