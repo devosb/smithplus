@@ -9,6 +9,7 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(description='Extract text from FTML files')
+    parser.add_argument('-o', '--output', help='Output directory')
     parser.add_argument('-s', '--sample', help='Sample project to reference')
     parser.add_argument('file', help='FTML files to process', nargs='+')
     parser.add_argument('--version', action='version', version='%(prog)s ' + '0.1')
@@ -18,6 +19,9 @@ def main():
         project_filenames = sorted(os.listdir(args.sample))
         book_filenames = [project_filename for project_filename in project_filenames if project_filename.endswith('SFM')]
 
+    dev = ''
+    if args.output:
+        dev = args.output
     for ftml_filename in args.file:
         # Parse FTML data
         ftml_data = FTML()
@@ -27,13 +31,13 @@ def main():
         (base_filename, ext) = os.path.splitext(ftml_filename)
 
         # Write plain text file
-        text_filename = f'../dev/txt/{base_filename}.txt'
+        text_filename = f'{dev}/txt/{base_filename}.txt'
         with open(text_filename, 'w') as text_file:
             text = ftml_data.text()
             text_file.write(text)
 
         # Write HTML file
-        html_filename = f'../dev/web/{base_filename}.html'
+        html_filename = f'{dev}/web/{base_filename}.html'
         with open(html_filename, 'w') as html_file:
             html = ftml_data.html()
             html_file.write(html)
@@ -43,7 +47,7 @@ def main():
 
         # Write SFM file
         book_filename = book_filenames.pop(0)
-        sfm_filename = f'../dev/sfm/{book_filename}'
+        sfm_filename = f'{dev}/sfm/{book_filename}'
         with open(sfm_filename, 'w', newline='\r\n') as sfm_file:
             sfm = ftml_data.sfm(base_filename, book_filename)
             sfm_file.write(sfm)

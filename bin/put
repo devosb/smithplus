@@ -7,15 +7,13 @@ if [ -x $cmd ]
 then
     echo "now running $cmd"
     $cmd
+elif [ -f $upgrade ]
+then
+    umask 022
+    bash $upgrade
 elif [ -f pyproject.toml ]
 then
     python3 -m pip install --user -e .
 else
-    if [ -f $upgrade ]
-    then
-        umask 022
-        bash $upgrade
-    else
-        echo "upgrade script $upgrade does not exist"
-    fi
+    echo "unknown upgrade workflow"
 fi

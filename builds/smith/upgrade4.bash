@@ -1,7 +1,7 @@
 # use XeTeX from Ubuntu and not a newer TeX Live
 export PATH=/usr/bin:$PATH
 
-python3 -m pip install --user .
+python3 -m pip install --user -e .
 
 # python3 setup.py develop --user
 

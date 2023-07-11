@@ -1,0 +1,6 @@
+#!/bin/bash
+prj=$PWD
+pushd $HOME/builds/fontra
+source venv/bin/activate
+fontra --launch filesystem $prj
+popd

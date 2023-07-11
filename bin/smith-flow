@@ -1,9 +1,14 @@
 #!/bin/bash
 
-export SILE_PATH=/mnt/builds/fontproof
-if [ -f .smithrc ]
+# export SILE_PATH=/mnt/builds/fontproof
+locl=${PWD/ci\//}-local
+rc=$locl/smithrc
+dev=$locl/dev
+wl=$dev/wordlist.txt
+
+if [ -f $rc ]
 then
-    source .smithrc
+    source $rc
 fi
 prj=$(basename $PWD)
 
@@ -48,7 +53,12 @@ fi
 
 if [ "$1" == "diff" ]
 then
-    diffenator2 diff -fb references/${prj^}-Regular.ttf -fa results/${prj^}-Regular.ttf --user-wordlist dev/wordlist.txt -o ~/guest
+    pushd results
+    for ttf in *.ttf
+    do
+        diffenator2 diff -fb ../references/$ttf -fa $ttf --user-wordlist $wl -o ~/guest
+    done
+    popd
     exit 0
 fi
 
@@ -212,7 +222,7 @@ then
     do
         if [ -d results/$www ]
         then
-            cp -v results/$www/*.woff2 dev/web
+            cp -v results/$www/*.woff2 $dev/web
         fi
     done
 
@@ -271,7 +281,7 @@ then
     # cp -a -v web/* $web
     for format in web sfm
     do
-        rsync -v -a --delete dev/$format $HOME/guest
+        rsync -v -a --delete $dev/$format $HOME/guest
     done
 
     host=${PWD/ci//}
@@ -284,14 +294,14 @@ then
     folder="$HOME/guest/Document Fonts"
     rm -rf "$folder"
     mkdir "$folder"
-    cp -v ../dev/*.ttf "$folder"
+    cp -v $dev/*.ttf "$folder"
     cp -v $host/references/Noto*.ttf "$folder"
     cp -v ../results/*.ttf "$folder"
 
     # plain text
     if [ -d generated ]
     then
-        for txt_file in *.txt generated/*.txt ../dev/txt/*.txt
+        for txt_file in *.txt generated/*.txt $dev/txt/*.txt
         do
             if [ -f $txt_file ]
             then
@@ -313,23 +323,21 @@ then
     then
         ssh-add ~/.ssh/id_ed25519_home
     fi
-    chmod -R go+Xr dev/web
-    rsync -v -a --delete dev/web/ nrsi.sil.org:/var/www/fonts/
+    chmod -R go+Xr $dev/web
+    rsync -v -a --delete $dev/web/ nrsi.sil.org:/var/www/fonts/
 
     exit 0
 fi
 
 if [ "$1" == "data" ]
 then
+    mkdir -p $dev/{txt,web,sfm}
     if [ -x makeftml ]
     then
         ./makeftml
-        mkdir -p dev/{txt,web,sfm}
     fi
 
-    pushd web
-    cp -v *.html *.css ../dev/web
-    popd
+    cp -v web/*.html web/*.css tools/*.html $dev/web
 
     pushd tests
     /bin/rm -rf generated
@@ -342,30 +350,30 @@ then
         fi
     done
 
-    ftml2txt -s $HOME/script/SP1 *.ftml
+    ftml2txt -o $dev -s $HOME/script/SP1 *.ftml
     for ftml in *.ftml
     do
         if [ -f $ftml ]
         then
-            cp ../dev/txt/${ftml%.ftml}.txt generated/${ftml%.ftml}.htxt
+            cp $dev/txt/${ftml%.ftml}.txt generated/${ftml%.ftml}.htxt
         fi
     done
 
-    cp /dev/null ../dev/wordlist.txt
+    cp /dev/null $wl
 
     for txt_file in *.txt generated/*.txt
     do
         if [ -f $txt_file ]
         then
-            cat $txt_file | sed 's/ /\n/g' | sed 's/,//g' >> ../dev/wordlist.txt
+            cat $txt_file | sed 's/ /\n/g' | sed 's/,//g' >> $wl
         fi
     done
 
-    for txt_file in ../dev/txt/*.txt
+    for txt_file in $dev/txt/*.txt
     do
         if [ -f $txt_file ]
         then
-            cat $txt_file | sed 's/,//g' >> ../dev/wordlist.txt
+            cat $txt_file | sed 's/,//g' >> $wl
         fi
     done
 
@@ -376,7 +384,7 @@ fi
 
 if [ "$1" == "reference" ]
 then
-    pushd dev
+    pushd $dev
     cp *.ttf old
     for ttf in *.ttf
     do
@@ -423,10 +431,4 @@ then
     exit 0
 fi
 
-extra=$(echo ../$prj-*/tests)
-if [ -d $extra ]
-then
-    export SMITH_EXTRATESTDIR=$extra
-    echo "SMITH_EXTRATESTDIR is $SMITH_EXTRATESTDIR"
-fi
 $HOME/.local/bin/smith "$@" $FLOWARGS
