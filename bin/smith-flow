@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # export SILE_PATH=/mnt/builds/fontproof
+guest=$HOME/guest
 locl=${PWD/ci\//}-local
-rc=$locl/smithrc
 dev=$locl/dev
+rc=$dev/smithrc
 wl=$dev/wordlist.txt
 
 if [ -f $rc ]
@@ -56,7 +57,7 @@ then
     pushd results
     for ttf in *.ttf
     do
-        diffenator2 diff -fb ../references/$ttf -fa $ttf --user-wordlist $wl -o ~/guest
+        diffenator2 diff -fb ../references/$ttf -fa $ttf --user-wordlist $wl -o $guest
     done
     popd
     exit 0
@@ -196,7 +197,7 @@ then
             if [ -f $dspace ]
             then
                 echo "building otf and ttf static fonts from $dspace"
-                fontmake -m $dspace -o otf ttf
+                fontmake -m $dspace --check-compatibility -o otf ttf
             fi
         done
     fi
@@ -207,22 +208,22 @@ fi
 if [ "$1" == "install" -o "$1" == "windows" -o "$1" == "apple" ]
 then
     cp -v results/*.ttf /mnt/fonts
-    cp -v results/*.ttf ~/guest
+    cp -v results/*.ttf $guest
     for output in *_?tf
     do
         if [ ! -d $output ]
         then
             continue
         fi
-        mkdir ~/guest/$output
-        cp -v $output/*.?tf ~/guest/$output
+        mkdir $guest/$output
+        cp -v $output/*.?tf $guest/$output
     done
 
     for www in web woff
     do
         if [ -d results/$www ]
         then
-            cp -v results/$www/*.woff2 $dev/web
+            cp -v results/$www/*.woff2 $guest/web
         fi
     done
 
@@ -275,20 +276,8 @@ fi
 
 if [ "$1" == "windows" ]
 then
-    # web=$HOME/guest/web
-    # rm -rf $web
-    # mkdir $web
-    # cp -a -v web/* $web
-    for format in web sfm
-    do
-        rsync -v -a --delete $dev/$format $HOME/guest
-    done
-
     host=${PWD/ci//}
     pushd tests
-
-    # windows apps
-    cp -v *.indd *.odt *.docx ~/guest
 
     # InDesign
     folder="$HOME/guest/Document Fonts"
@@ -301,12 +290,12 @@ then
     # plain text
     if [ -d generated ]
     then
-        for txt_file in *.txt generated/*.txt $dev/txt/*.txt
+        for txt_file in *.txt generated/*.txt
         do
             if [ -f $txt_file ]
             then
                 txt=$(basename $txt_file)
-                unix2dos -n $txt_file ~/guest/$txt
+                unix2dos -n $txt_file $guest/$txt
             fi
         done
     fi
@@ -323,23 +312,31 @@ then
     then
         ssh-add ~/.ssh/id_ed25519_home
     fi
-    chmod -R go+Xr $dev/web
-    rsync -v -a --delete $dev/web/ nrsi.sil.org:/var/www/fonts/
+    chmod -R go+Xr $guest/web
+    rsync -v -a --delete $guest/web/ nrsi.sil.org:/var/www/fonts/
 
     exit 0
 fi
 
 if [ "$1" == "data" ]
 then
-    mkdir -p $dev/{txt,web,sfm}
+    rm -f $guest/*.*
+    rm -rf $guest/{txt,web,sfm}
+    mkdir -p $guest/{txt,web,sfm}
+
     if [ -x makeftml ]
     then
         ./makeftml
     fi
 
-    cp -v web/*.html web/*.css tools/*.html $dev/web
+    # web apps
+    ln -v -f web/*.html web/*.css tools/*.html $dev/web/* $guest/web
 
     pushd tests
+
+    # windows apps
+    ln -v -f *.indd *.odt *.docx $guest
+
     /bin/rm -rf generated
     mkdir generated
     for htxt in *.htxt
@@ -350,12 +347,12 @@ then
         fi
     done
 
-    ftml2txt -o $dev -s $HOME/script/SP1 *.ftml
+    ftml2txt -o $guest -s $HOME/script/SP1 *.ftml
     for ftml in *.ftml
     do
         if [ -f $ftml ]
         then
-            cp $dev/txt/${ftml%.ftml}.txt generated/${ftml%.ftml}.htxt
+            cp $guest/txt/${ftml%.ftml}.txt generated/${ftml%.ftml}.htxt
         fi
     done
 
@@ -369,13 +366,14 @@ then
         fi
     done
 
-    for txt_file in $dev/txt/*.txt
+    for txt_file in $guest/txt/*.txt
     do
         if [ -f $txt_file ]
         then
             cat $txt_file | sed 's/,//g' >> $wl
         fi
     done
+    unix2dos $guest/txt/*.txt
 
     popd
 
@@ -388,7 +386,7 @@ then
     cp *.ttf old
     for ttf in *.ttf
     do
-        cp -p ~/guest/$ttf .
+        cp -p -v $guest/$ttf .
     done
     ls -l *.ttf
     popd

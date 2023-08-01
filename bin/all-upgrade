@@ -4,7 +4,7 @@ umask 022
 sudo echo root
 
 rm -rf $HOME/.local/{bin,lib}
-pip3 install --upgrade pip wheel setuptools
+pip3 install --upgrade pip wheel setuptools beautifulsoup4 soupsieve
 
 locations=host
 if [ $HOSTNAME = apple -o $HOSTNAME = fruit ]
@@ -46,7 +46,7 @@ pip3 install MutatorMath
 
 # Show build timestamps
 pushd /run/shm
-ls -lt ~/.local/bin/ /usr/local/bin/ ~/builds/fontvalidator/bin
+ls -lt /usr/local/bin/ ~/builds/fontvalidator/bin
 find /usr/local/lib -name fontforge* -exec ls -l {} \;
 find /usr/local/lib -name psMat* -exec ls -l {} \;
 popd

@@ -3,6 +3,10 @@
 prj=$(basename $PWD)
 cmd=../docs-$prj
 upgrade=$SMITHHOME/$prj/upgrade*.bash
+# if [ -f requirements.txt ]
+# then
+#     pip3 install -r requirements.txt
+# fi
 if [ -x $cmd ]
 then
     echo "now running $cmd"
