@@ -1,1 +1,1 @@
-git clone https://github.com/googlefonts/fontbakery.git
+git clone https://github.com/fonttools/fontbakery.git

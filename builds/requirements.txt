@@ -1,0 +1,17 @@
+pytest
+Cython
+PyICU
+weasyprint
+
+# pysilfont
+lz4
+
+# FTML
+odfpy
+
+# charset
+cssutils
+
+# font bakery
+beautifulsoup4
+dehinter

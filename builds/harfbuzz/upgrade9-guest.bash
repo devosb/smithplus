@@ -7,10 +7,10 @@ mkdir build
 
 if [ -f meson.build ]
 then
-    # meson build -Dgraphite=enabled -Dauto_features=enabled
-    meson build -Dauto_features=enabled -Dwasm=enabled
+    # meson setup build -Dgraphite=enabled -Dauto_features=enabled -Ddocs=disabled
+    meson setup build -Dauto_features=enabled -Dwasm=enabled -Ddocs=disabled
     # meson compile -Cbuild -j9
-    ninja -Cbuild -j8
+    ninja -Cbuild
     meson test -Cbuild --print-errorlogs
     pushd build
     sudo meson install

@@ -3,10 +3,10 @@ git submodule update --init --recursive
 export CC=clang
 export CXX=clang++
 rm -rf build
-#meson -Ddebug=true -Dgraphite=true build
-meson build
+#meson setup -Ddebug=true -Dgraphite=true build
+meson setup build
 ninja -C build
-sudo ninja -C build install
+sudo meson install -C build
 
 # Reads all the fonts on my system,
 # in additonal to the fonts in the source tree,

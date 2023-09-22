@@ -1,1 +1,1 @@
-git clone https://github.com/greginvm/pyclipper.git
+git clone https://github.com/fonttools/pyclipper.git
