@@ -1,0 +1,26 @@
+#!/bin/bash
+
+slug="$1"
+dir=$(dirname $PWD)
+prj=$(basename $dir -local)
+dev=../dev
+unzip -d zip ${slug}.zip
+tar -Jxf ${slug}.tar.xz
+mkdir txz
+mv ${slug} txz
+for dir in zip/$slug txz/$slug $dev
+do
+    pushd $dir
+    for ttf in *.ttf
+    do
+        if [ -f $ttf ]
+        then
+            ttx $ttf
+        fi
+    done
+    popd
+done
+meld zip/$slug txz/$slug
+diff -r txz/$slug $dev
+otfinfo -i txz/${slug}/*.ttf | grep Version:
+rm -rf zip txz $dev/*.ttx
