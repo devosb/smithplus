@@ -16,6 +16,8 @@ do
         if [ -f $ttf ]
         then
             ttx $ttf
+            root=$(basename $ttf .ttf)
+            $HOME/builds/fontations/target/debug/otexplorer $ttf > ${root}.ttr
         fi
     done
     popd
@@ -23,4 +25,8 @@ done
 meld zip/$slug txz/$slug
 diff -r txz/$slug $dev
 otfinfo -i txz/${slug}/*.ttf | grep Version:
-rm -rf zip txz $dev/*.ttx
+for ttf in txz/${slug}/*.ttf
+do
+    $HOME/builds/fontations/target/debug/otexplorer -t name $ttf | grep Version
+done
+rm -rf zip txz $dev/*.ttx $dev/*.ttr

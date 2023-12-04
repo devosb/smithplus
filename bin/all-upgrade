@@ -6,9 +6,7 @@ sudo echo root
 rm -rf $HOME/.local/{bin,lib}
 hash -r
 pip3 install --upgrade pip toml flit packaging wheel setuptools tox Pillow urllib3
-#pip3 install --upgrade beautifulsoup4 soupsieve
 sudo pip3 install --upgrade ninja meson
-pip3 install -r $SMITHHOME/requirements.txt
 
 locations=host
 if [ $HOSTNAME = apple -o $HOSTNAME = fruit ]
@@ -40,6 +38,8 @@ do
     done
 done
 sudo ldconfig
+
+pip3 install -r $SMITHHOME/requirements.txt
 
 # Install fontmake (again) in a virtual environment
 rm -rf fourplus

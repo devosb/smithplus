@@ -3,12 +3,6 @@ Cython
 PyICU
 weasyprint
 
-# pysilfont
-lz4
-
-# FTML
-odfpy
-
 # charset
 cssutils
 

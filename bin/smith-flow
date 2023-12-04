@@ -5,6 +5,7 @@ guest=$HOME/guest
 locl=${PWD/ci\//}-local
 dev=$locl/dev
 rc=$dev/smithrc
+bv=$dev/bumpversion.cfg
 wl=$guest/wordlist.txt
 
 if [ -f $rc ]
@@ -425,7 +426,7 @@ then
             psfsetversion $ufo "$version"
         fi
     done
-    bumpversion --allow-dirty --new-version "$version" major
+    bumpversion --config-file $bv --allow-dirty --new-version "$version" major
     exit 0
 fi
 
