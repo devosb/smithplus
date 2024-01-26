@@ -15,6 +15,7 @@ def main():
     parser = argparse.ArgumentParser(description='Check character inventory of a TTF font')
     parser.add_argument('-b', '--block', help='Group ranges by block', action='store_true')
     parser.add_argument('-c', '--css', help='Output in CSS Unicode range format', action='store_true')
+    parser.add_argument('-r', '--reverse', help='Reverse the comparison', action='store_true')
     parser.add_argument('subset', help='Character set to check')
     parser.add_argument('item', help='TTF font files to process', nargs='*')
     parser.add_argument('--version', action='version', version='%(prog)s ' + '0.1')
@@ -23,7 +24,7 @@ def main():
     ucd = UCD()
     block_names = get_block_names()
 
-    subset = get_codepoints(args.subset)
+    subset_set = get_codepoints(args.subset)
     items = args.item
     if len(items) == 0:
         # only the subset has been specified, so compare the
@@ -36,7 +37,12 @@ def main():
     for item in items:
         if multiple:
             print(f'{item}:')
-        differences = sorted(subset - get_codepoints(item))
+        item_set = get_codepoints(item)
+        if args.reverse:
+            differences_set = subset_set & item_set
+        else:
+            differences_set = subset_set - item_set
+        differences = sorted(differences_set)
         if args.css:
             output_css(differences, ucd, block_names)
         elif args.block:

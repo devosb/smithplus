@@ -8,14 +8,15 @@ and covers `glyph_names.csv`.
 
 # Characters
 
-- U+2206 INCREMENT looks like U+0394 GREEK CAPITAL LETTER 
-DELTA
+- U+2206 INCREMENT looks like U+0394 GREEK CAPITAL LETTER DELTA
 - U+2126 OHM SIGN + NFC = U+03A9 GREEK CAPITAL LETTER OMEGA
 - U+00B5 MICRO SIGN + NFKC = U+03BC GREEK SMALL LETTER MU
+- U+220F N-ARY PRODUCT might look like like U+03A0 GREEK CAPITAL LETTER PI
+- U+2211 N-ARY SUMMATION might look like U+01A9 LATIN CAPITAL LETTER ESH and/or U+03A3 GREEK CAPITAL LETTER SIGMA
 
 ## AGLFN
 
-The AGLFN names below (middle field) used the non-Greek codepoints, ./,makethen switched to the Greek codepoints, then back.
+The AGLFN names below (middle field) used the non-Greek codepoints, then switched to the Greek codepoints, then back.
 
 - 2206;Delta;INCREMENT
 - 2126;Omega;OHM SIGN
