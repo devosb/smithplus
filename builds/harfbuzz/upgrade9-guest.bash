@@ -7,8 +7,8 @@ mkdir build
 
 if [ -f meson.build ]
 then
-    # meson setup build -Dgraphite=enabled -Dauto_features=enabled -Ddocs=disabled
-    meson setup build -Dauto_features=enabled -Dwasm=enabled -Ddocs=disabled
+    meson setup build -Dgraphite=enabled -Dauto_features=enabled -Ddocs=disabled
+    # meson setup build -Dauto_features=enabled -Dwasm=enabled -Ddocs=disabled
     # meson compile -Cbuild -j9
     ninja -Cbuild
     meson test -Cbuild --print-errorlogs

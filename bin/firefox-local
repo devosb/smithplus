@@ -15,4 +15,5 @@ for dir in results references tests tools
 do
     rsync -a -v -h --exclude results/source --delete $dir $ffl
 done
+cp -p -v $PWD-private/tests/*.ftml $ffl/tests
 firefox $ffl/$1

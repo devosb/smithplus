@@ -5,6 +5,7 @@ weasyprint
 
 # charset
 cssutils
+shaperglot
 
 # font bakery
 beautifulsoup4
