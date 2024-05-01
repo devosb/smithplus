@@ -2,10 +2,10 @@ pytest
 Cython
 PyICU
 weasyprint
+psautohint
 
 # charset
 cssutils
-shaperglot
 
 # font bakery
 beautifulsoup4

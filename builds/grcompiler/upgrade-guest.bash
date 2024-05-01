@@ -1,7 +1,5 @@
 rm -rf build
 mkdir build
-pushd build
-cmake -DCMAKE_BUILD_TYPE=Debug ..
-make
-sudo make install
-popd
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -B build
+cmake --build build
+sudo cmake --install build

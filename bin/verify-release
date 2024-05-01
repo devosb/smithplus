@@ -3,7 +3,7 @@
 slug="$1"
 dir=$(dirname $PWD)
 prj=$(basename $dir -local)
-dev=../dev
+dev=../references
 unzip -d zip ${slug}.zip
 tar -Jxf ${slug}.tar.xz
 mkdir txz
@@ -23,7 +23,7 @@ do
     popd
 done
 meld zip/$slug txz/$slug
-diff -r txz/$slug $dev
+diff -r $dev txz/$slug
 otfinfo -i txz/${slug}/*.ttf | grep Version:
 for ttf in txz/${slug}/*.ttf
 do
