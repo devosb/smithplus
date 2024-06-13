@@ -2,19 +2,19 @@
 
 prj=$(basename $PWD)
 
-cmd=../rrun-$prj
-if [ -x $cmd ]
-then
-    echo "now running $cmd"
-    $cmd
-
-    cmd=../rrun-$prj-*
+font=""
+for cmd in ../rrun-$prj*
+do
     if [ -x $cmd ]
     then
         echo "now running $cmd"
         $cmd
+        font="found"
     fi
-else
+done
+
+if [ -z "$font" ]
+then
     dir=/mnt/builds/$prj
     if [ -d $dir ]
     then
