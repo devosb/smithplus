@@ -1,0 +1,6 @@
+#!/bin/bash
+export BROWSER=google-chrome-stable
+dolphin $HOME/guest/xtf &
+pushd $HOME/builds/crowbar
+npm start
+popd

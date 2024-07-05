@@ -1,8 +1,8 @@
-#/bin/bash
+#!/bin/bash
 
 for checkout in $SMITHHOME/*/checkout.bash
 do
     lib=$(dirname ${checkout})
     src=$(basename ${lib})
-    git clone ${src} ~/builds/${src}
+    git clone --recurse-submodules ${src} ~/builds/${src}
 done

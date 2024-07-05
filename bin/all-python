@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 # Many Python projects use the upgrade.bash script from thefoxutils.
 # Other Python projects (list following) use this script with additions.

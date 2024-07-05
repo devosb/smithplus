@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 umask 022
 sudo echo root
