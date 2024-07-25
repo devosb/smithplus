@@ -6,14 +6,5 @@ then
     exit 1
 fi
 
-ffl=$HOME/ffl
-if [ ! -d $ffl ]
-then
-    mkdir $ffl
-fi
-for dir in results references tests tools
-do
-    rsync -a -v -h --exclude results/source --delete $dir $ffl
-done
-cp -p -v $PWD-private/tests/*.ftml $ffl/tests
-firefox $ffl/$1
+cp -p -v $PWD-private/tests/*.ftml tests
+firefox $1

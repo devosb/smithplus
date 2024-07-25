@@ -5,8 +5,11 @@ sudo echo root
 
 rm -rf $HOME/.local/{bin,lib}
 hash -r
-pip3 install --upgrade pip toml flit packaging wheel setuptools tox Pillow urllib3
-sudo pip3 install --upgrade ninja meson
+pip3 install --upgrade --user pip toml flit packaging wheel setuptools tox Pillow urllib3
+sudo pip3 install --break-system-packages --upgrade ninja meson
+# vn -i
+# vn pip install --upgrade pip toml flit packaging wheel setuptools tox Pillow urllib3
+# vn pip install --upgrade ninja meson
 
 locations=host
 if [ $HOSTNAME = apple -o $HOSTNAME = fruit ]
@@ -32,7 +35,7 @@ do
             lib=$(dirname ${upgrade})
             src=$(basename ${lib})
             pushd ${src}
-            bash ${upgrade}
+            put
             popd
         done
     done
@@ -40,13 +43,7 @@ done
 sudo ldconfig
 
 pip3 install -r $SMITHHOME/requirements.txt
-
-# Install fontmake (again) in a virtual environment
-rm -rf fourplus
-python3 -m venv fourplus
-source fourplus/bin/activate
-pip3 install fontmake
-pip3 install MutatorMath
+# vn pip install -r $SMITHHOME/requirements.txt
 
 # Show build timestamps
 pushd /run/shm
@@ -57,3 +54,4 @@ popd
 
 # Use the latest fontTools
 $HOME/.local/bin/pip3 show fonttools
+# vn pip show fonttools

@@ -474,6 +474,7 @@ then
     unix2dos $guest/txt/*.txt
 
     popd
+    xhost +local:
 
     exit 0
 fi
