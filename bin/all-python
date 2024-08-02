@@ -17,12 +17,23 @@ do
         fi
         for upgrade in $SMITHHOME/*/upgrade${level}${suffix}.bash
         do
+            if [ ! -f ${upgrade} ]
+            then
+                continue
+            fi
             lib=$(dirname ${upgrade})
             src=$(basename ${lib})
-            if [ -f ${src}/setup.py ]
+            if [ -f ${src}/pyproject.toml -o -f ${src}/setup.py ]
             then
-                echo ${src}
+                md5sum ${upgrade}
             fi
+            # cmp -s ${upgrade} $SMITHHOME/upgrade.bash
+            # if [ $? -eq 0 ]
+            # then
+            #     echo ${src}
+            #     md5sum ${upgrade} $SMITHHOME/upgrade.bash
+            #     cp /dev/null ${upgrade}
+            # fi
         done
     done
 done

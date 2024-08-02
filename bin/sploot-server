@@ -1,4 +1,4 @@
 #!/bin/bash
-pushd $HOME/builds/crowbar
+pushd $HOME/builds/sploot
 npm start
 popd

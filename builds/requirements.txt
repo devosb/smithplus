@@ -10,3 +10,8 @@ cssutils
 # font bakery
 beautifulsoup4
 dehinter
+
+# lint
+flake8
+ruff
+isort
