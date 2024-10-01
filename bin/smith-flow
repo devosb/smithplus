@@ -419,8 +419,8 @@ fi
 if [ "$mode" == "data" ]
 then
     rm -f $guest/*.*
-    rm -rf $guest/{xtf,txt,web,sfm}
-    mkdir -p $guest/{xtf,txt,web,sfm}
+    rm -rf $guest/{xtf,txt,web,sfm,pdfs,sile}
+    mkdir -p $guest/{xtf,txt,web,sfm,pdfs,sile}
 
     if [ -x makeftml ]
     then
@@ -428,7 +428,7 @@ then
     fi
 
     # web apps
-    ln -v -f web/*.html web/*.css tools/*.html $ht $guest/web
+    ln -v -f web/*.html web/*.css tools/*.html $ref/*VF* $ht $guest/web
 
     pushd tests
 
@@ -542,6 +542,16 @@ then
     exit 0
 fi
 
+big=$(echo $locl/tests)
+if [ "$mode" == "bigtest" ]
+then
+    if [ -d $big ]
+    then
+        cp -p -v $big/* tests
+    fi
+    mode=test
+fi
+
 extra=$(echo ../$prj-private/tests)
 if [ -d $extra -a "$mode" != "pdfs" ]
 then
@@ -564,4 +574,11 @@ then
     mode=build
 fi
 shift
+
+# run smith
 $HOME/.local/bin/smith "$mode" "$@" $FLOWARGS
+
+if [ "$mode" == "pdfs" -o "$mode" == "sile" ]
+then
+    cp -p -v results/tests/$mode/*.pdf $guest/$mode
+fi
