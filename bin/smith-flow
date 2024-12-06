@@ -275,7 +275,7 @@ then
     # smith
     for dir in $guest/xtf /mnt/fonts $guest
     do
-        cp -v results/*.ttf $dir
+        cp -v results/*.ttf results/*/*.ttf $dir
     done
 
     # fontmake static
@@ -482,26 +482,17 @@ fi
 if [ "$mode" == "reference" ]
 then
     pushd results
-    for ttf in *.ttf
+    for ttf in *.ttf */*.ttf tests/ftml/fonts/*.ttf tests/ftml/fonts/*/*.ttf
     do
-        cp -p -v $ref/$ttf $ref/old
-        cp -p -v $ttf $ref
+        if [ -f $ttf ]
+        then
+            rsync -v -a -R $ttf $ref
+        fi
     done
     popd
 
-    if [ -d results/tests/ftml/fonts ]
-    then
-        pushd results/tests/ftml/fonts
-        for ttf in *.ttf
-        do
-            cp -p -v $ref/$ttf $ref/old
-            cp -p -v $ttf $ref
-        done
-        popd
-    fi
-
     pushd $ref
-    ls -l -t *.ttf
+    ls -l -t *.ttf */*.ttf
     popd
 
     exit 0
@@ -573,11 +564,35 @@ then
     gdcsv-debug
     mode=build
 fi
-shift
 
 # run smith
+shift
 $HOME/.local/bin/smith "$mode" "$@" $FLOWARGS
 
+# flatten test directory hierarchy
+if [ "$mode" == "test" ]
+then
+    pushd results/tests/test
+    for html in */*.html
+    do
+        dotdot=$(echo $html | sed -e 's/\//_/g')
+        mv $html $dotdot
+    done
+
+    for fonts in */fonts_*
+    do
+        dotdot=$(basename $fonts)
+        mv $fonts/*.ttf $dotdot
+    done
+
+    for fonts in */fonts_*0*
+    do
+        rm -rf $(dirname $fonts)
+    done
+    popd
+fi
+
+# move created PDFs to guest
 if [ "$mode" == "pdfs" -o "$mode" == "sile" ]
 then
     cp -p -v results/tests/$mode/*.pdf $guest/$mode

@@ -1,5 +1,4 @@
 #!/bin/bash
-export BROWSER=google-chrome-stable
 prj=$PWD
 pushd $HOME/builds/fontra
 source venv/bin/activate

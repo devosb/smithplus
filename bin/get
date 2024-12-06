@@ -19,6 +19,6 @@ then
     if [ -d $dir ]
     then
         echo "now running rsync $dir"
-        rsync -a -v $dir/ .
+        rsync -v -a --delete $dir/ .
     fi
 fi
