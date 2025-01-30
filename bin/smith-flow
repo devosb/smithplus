@@ -6,6 +6,7 @@ mode="$1"
 guest=$HOME/guest
 locl=${PWD/ci\//}-local
 ref=$locl/references
+cmp=$locl/compare
 dev=$locl/dev
 rc=$dev/smithrc
 ht=$dev/dev.css
@@ -371,19 +372,12 @@ fi
 
 if [ "$mode" == "windows" ]
 then
-    host=${PWD/ci//}
     pushd tests
 
     # InDesign
     folder="$HOME/guest/Document Fonts"
-    rm -rf "$folder"
-    mkdir "$folder"
-    cp -v $ref/*.ttf "$folder"
-    cp -v $host/references/Noto*.ttf "$folder"
+    rsync -v -a --delete $ref/ "$folder"
     cp -v ../results/*.ttf "$folder"
-
-    # to install in Windows
-    cp -v ../results/*.ttf $guest
 
     # plain text
     if [ -d generated ]
@@ -468,7 +462,7 @@ then
     do
         if [ -f $txt_file ]
         then
-            cat $txt_file | sed 's/,//g' >> $wl
+            cat $txt_file >> $wl
         fi
     done
     unix2dos $guest/txt/*.txt
@@ -482,11 +476,18 @@ fi
 if [ "$mode" == "reference" ]
 then
     pushd results
-    for ttf in *.ttf */*.ttf tests/ftml/fonts/*.ttf tests/ftml/fonts/*/*.ttf
+    for ttf in *.ttf */*.ttf
     do
         if [ -f $ttf ]
         then
             rsync -v -a -R $ttf $ref
+        fi
+    done
+    for ttf in tests/ftml/fonts/*.ttf tests/ftml/fonts/*/*.ttf
+    do
+        if [ -f $ttf ]
+        then
+            rsync -v -a -R $ttf $cmp
         fi
     done
     popd
@@ -575,19 +576,28 @@ then
     pushd results/tests/test
     for html in */*.html
     do
-        dotdot=$(echo $html | sed -e 's/\//_/g')
-        mv $html $dotdot
+        if [ -f $html ]
+        then
+            dotdot=$(echo $html | sed -e 's/\//_/g')
+            mv $html $dotdot
+        fi
     done
 
     for fonts in */fonts_*
     do
-        dotdot=$(basename $fonts)
-        mv $fonts/*.ttf $dotdot
+        if [ -d $fonts ]
+        then
+            dotdot=$(basename $fonts)
+            mv $fonts/*.ttf $dotdot
+        fi
     done
 
     for fonts in */fonts_*0*
     do
-        rm -rf $(dirname $fonts)
+        if [ -d $fonts ]
+        then
+            rm -rf $(dirname $fonts)
+        fi
     done
     popd
 fi
