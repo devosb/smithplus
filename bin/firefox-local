@@ -7,4 +7,4 @@ then
 fi
 
 cp -p -v $PWD-private/tests/*.ftml tests
-firefox $1
+firefox "$@"

@@ -3,6 +3,7 @@
 mode="$1"
 
 # export SILE_PATH=/mnt/builds/fontproof
+export CTR_UHB=1
 guest=$HOME/guest
 locl=${PWD/ci\//}-local
 ref=$locl/references
@@ -320,47 +321,14 @@ then
         fi
     done
 
-    # ftml
     if [ "$mode" != "apple" ]
     then
-        # FTML files
         pushd tests
-        psfcheckftml
         for ftml in *.ftml
         do
-            # check for valid files
-            xmllint --noout --dtdvalid $HOME/builds/ftml/FTML.dtd $ftml
-            if [ $? -gt 0 ]
-            then
-                echo "ftml file $ftml is invalid"
-            fi
-
-            # produce document
             ftml2odt ${ftml%.ftml}
         done
         popd
-
-        # TypeTuner files
-        if [ -d source/typetuner ]
-        then
-            pushd source/typetuner
-            for tag in all set
-            do
-                dtd=feat_${tag}.dtd
-                for xml in feat_${tag}*.xml
-                do
-                    echo xmllint --noout --dtdvalid $dtd $xml
-                    xmllint --noout --dtdvalid $dtd $xml
-                    if [ $? -gt 0 ]
-                    then
-                        echo "TypeTuner XML file $xml is invalid"
-                    fi
-                done
-            done
-            popd
-        fi
-
-        # Documentation
         rsync -v -a --delete documentation $guest
     fi
 
@@ -467,7 +435,38 @@ then
     done
     unix2dos $guest/txt/*.txt
 
+    psfcheckftml
+    for ftml in *.ftml
+    do
+        # check for valid files
+        xmllint --noout --dtdvalid $HOME/builds/ftml/FTML.dtd $ftml
+        if [ $? -gt 0 ]
+        then
+            echo "ftml file $ftml is invalid"
+        fi
+    done
     popd
+
+    # TypeTuner files
+    if [ -d source/typetuner ]
+    then
+        pushd source/typetuner
+        for tag in all set
+        do
+            dtd=feat_${tag}.dtd
+            for xml in feat_${tag}*.xml
+            do
+                echo xmllint --noout --dtdvalid $dtd $xml
+                xmllint --noout --dtdvalid $dtd $xml
+                if [ $? -gt 0 ]
+                then
+                    echo "TypeTuner XML file $xml is invalid"
+                fi
+            done
+        done
+        popd
+    fi
+
     xhost +local:
 
     exit 0

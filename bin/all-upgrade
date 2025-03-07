@@ -3,7 +3,7 @@
 umask 022
 sudo echo root
 
-rm -rf $HOME/.local/{bin,lib}
+rm -rf $HOME/.local/{bin,lib} $HOME/.cache/pip
 hash -r
 pip3 install --upgrade --user pip toml flit packaging wheel setuptools tox Pillow urllib3
 sudo pip3 install --break-system-packages --upgrade ninja meson

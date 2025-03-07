@@ -23,7 +23,8 @@ restore)
     sudo lxc restore $instance updates
     ;;
 snapshot)
-    sudo lxc delete $instance/updates
+    sudo lxc delete $instance/updates-old
+    sudo lxc rename $instance/updates $instance/updates-old
     sudo lxc snapshot $instance updates
     ;;
 list)

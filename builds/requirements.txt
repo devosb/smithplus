@@ -15,3 +15,7 @@ dehinter
 flake8
 ruff
 isort
+
+# font diff
+fbdiff
+fdiff
