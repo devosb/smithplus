@@ -1,10 +1,12 @@
 #!/bin/bash
 
 mode="$1"
+prj=$(basename $PWD)
 
 # export SILE_PATH=/mnt/builds/fontproof
 export CTR_UHB=1
 guest=$HOME/guest
+priv=../$prj-private
 locl=${PWD/ci\//}-local
 ref=$locl/references
 cmp=$locl/compare
@@ -40,8 +42,6 @@ if [ ! -f $wl ]
 then
     echo "Dev file $wl does not exist"
 fi
-
-prj=$(basename $PWD)
 
 if [ ! -f wscript ]
 then
@@ -380,6 +380,8 @@ fi
 
 if [ "$mode" == "data" ]
 then
+    touch .active $priv/.active
+
     rm -f $guest/*.*
     rm -rf $guest/{xtf,txt,web,sfm,pdfs,sile}
     mkdir -p $guest/{xtf,txt,web,sfm,pdfs,sile}
@@ -543,7 +545,7 @@ then
     mode=test
 fi
 
-extra=$(echo ../$prj-private/tests)
+extra=$(echo $priv/tests)
 if [ -d $extra -a "$mode" != "pdfs" ]
 then
     export SMITH_EXTRATESTDIR=$extra
