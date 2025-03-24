@@ -4,9 +4,6 @@ PyICU
 weasyprint
 psautohint
 
-# charset
-cssutils
-
 # font bakery
 beautifulsoup4
 dehinter
