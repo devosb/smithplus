@@ -179,9 +179,19 @@ then
             continue
         fi
         flavor=$(echo $output | cut -d _ -f 2)
-        fontbakery check-profile silfont.fbtests.profile $output/*.$flavor --html $output/fbchecks.html -F --succinct -S
+        fb_options="-F --succinct -S"
+        fontbakery check-profile silfont.fbtests.profile $output/*.$flavor --html $output/silfont.html $fb_options
+        fontbakery check-googlefonts $output/*.$flavor --html $output/googlefonts.html $fb_options
     done
     exit 0
+fi
+
+# enable extra debugging most of the time
+if [ "$mode" == "release" -o "$mode" == "zip" -o "$mode" == "tarball" ]
+then
+    echo -n
+else
+    export FONTTOOLS_LOOKUP_DEBUGGING=1
 fi
 
 if [ "$mode" == "make" ]
@@ -205,6 +215,11 @@ then
                 if [ "$2" == "variable" -o -z "$2" ]
                 then
                     echo "building variable font from $dspace"
+                    if [ -x prevariable ]
+                    then
+                        echo "running prevariable"
+                        ./prevariable
+                    fi
 
                     echo "smith flow (sf)"
                     designpath=${dspace%-VF.designspace}
@@ -235,13 +250,6 @@ then
             then
                 echo "Google Fonts (gf)"
                 gftools builder googlefonts.yaml
-                pushd gf/variable
-                for ttf in *.ttf
-                do
-                    familyname=$(otfinfo -a $ttf)
-                    gftools fix-family --inplace --rename-family "${familyname} GF" $ttf
-                done
-                popd
             fi
 
             if [ -f tirobuild.yaml ]
@@ -249,6 +257,34 @@ then
                 echo "Tiro Build (tb)"
                 python3 $HOME/builds/tirotools/Builder/tirobuild.py tirobuild.yaml
             fi
+        fi
+
+        if [ -d sf ]
+        then
+            mkdir sf_ttf
+            cp -v sf/*.ttf sf_ttf
+        fi
+        if [ -d gf ]
+        then
+            for dir in gf_ttf gr_ttf
+            do
+                mkdir $dir
+                cp -v gf/variable/*.ttf $dir
+            done
+
+            pushd gr_ttf
+            for ttf in *.ttf
+            do
+                familyname=$(echo $ttf | cut -d- -f 1)
+                gftools fix-family --inplace --rename-family "${familyname} GR" $ttf
+                mv -v $ttf ${ttf/VF\[wght\]/GR}
+            done
+            popd
+        fi
+        if [ -d output ]
+        then
+            mkdir tb_ttf
+            cp -v output/tirobuild/*/TTFVF/*.ttf tb_ttf
         fi
 
         for output in instance_*
@@ -274,44 +310,16 @@ fi
 
 if [ "$mode" == "install" -o "$mode" == "windows" -o "$mode" == "apple" ]
 then
-    # smith
-    for dir in $guest/xtf /mnt/fonts $guest
+    for sfnt in results/*.ttf results/*/*.ttf *_?tf/*.?tf
     do
-        cp -v results/*.ttf results/*/*.ttf $dir
-    done
-
-    # fontmake static
-    for output in *_?tf
-    do
-        if [ ! -d $output ]
+        if [ -f $sfnt ]
         then
-            continue
+            for dir in $guest/xtf /mnt/fonts $guest
+            do
+                cp -v $sfnt $dir
+            done
         fi
-        mkdir $guest/$output
-        cp -v $output/*.?tf $guest/$output
     done
-
-    # fontmake variable
-    if [ -d sf ]
-    then
-        cp -v sf/*.ttf /mnt/fonts
-        cp -v sf/*.ttf $guest
-    fi
-    if [ -d gf ]
-    then
-        pushd gf/variable
-        for ttf in *.ttf
-        do
-            cp -v -p $ttf /mnt/fonts/${ttf/\[wght\]/-GF}
-            cp -v -p $ttf $guest
-        done
-        popd
-    fi
-    if [ -d output ]
-    then
-        cp -v output/tirobuild/*/TTFVF/*.ttf /mnt/fonts
-        cp -v output/tirobuild/*/TTFVF/*.ttf $guest
-    fi
 
     for www in web woff
     do
@@ -550,14 +558,6 @@ if [ -d $extra -a "$mode" != "pdfs" ]
 then
     export SMITH_EXTRATESTDIR=$extra
     echo "SMITH_EXTRATESTDIR is $SMITH_EXTRATESTDIR"
-fi
-
-# enable extra debugging most of the time
-if [ "$mode" == "release" -o "$mode" == "zip" -o "$mode" == "tarball" ]
-then
-    echo -n
-else
-    export FONTTOOLS_LOOKUP_DEBUGGING=1
 fi
 
 # enable even more dubugging
