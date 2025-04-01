@@ -266,18 +266,41 @@ then
         fi
         if [ -d gf ]
         then
-            for dir in gf_ttf gr_ttf
+            rm -rf vresults
+            mkdir gf_ttf gr_ttf vresults
+
+            pushd gf/variable
+            for ttf in *.ttf
             do
-                mkdir $dir
-                cp -v gf/variable/*.ttf $dir
+                for dir in ../../g?_ttf
+                do
+                    cp -v $ttf $dir
+                done
             done
+            popd
+
+            pushd gf_ttf
+            for ttf in *.ttf
+            do
+                familyname=$(echo $ttf | cut -d- -f 1)
+                gftools fix-family --inplace --rename-family "${familyname} GF" $ttf
+                mv -v $ttf ${ttf/VF/GF}
+            done
+            popd
 
             pushd gr_ttf
             for ttf in *.ttf
             do
                 familyname=$(echo $ttf | cut -d- -f 1)
-                gftools fix-family --inplace --rename-family "${familyname} GR" $ttf
-                mv -v $ttf ${ttf/VF\[wght\]/GR}
+
+                rename=${ttf/VF/GR}
+                cleaner=${rename/\[wght\]/}
+                mv -v $ttf $cleaner
+
+                cleanest=${cleaner/-GR/}
+                cp -v $cleaner ../vresults/$cleanest
+
+                gftools fix-family --inplace --rename-family "${familyname} GR" $cleaner
             done
             popd
         fi
