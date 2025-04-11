@@ -1,6 +1,7 @@
 #!/bin/bash
 
 mode="$1"
+submode="$2"
 prj=$(basename $PWD)
 
 # export SILE_PATH=/mnt/builds/fontproof
@@ -9,6 +10,7 @@ guest=$HOME/guest
 priv=../$prj-private
 locl=${PWD/ci\//}-local
 ref=$locl/references
+var=$locl/variable
 cmp=$locl/compare
 dev=$locl/dev
 rc=$dev/smithrc
@@ -179,8 +181,10 @@ then
             continue
         fi
         flavor=$(echo $output | cut -d _ -f 2)
-        fb_options="-F --succinct -S"
+        fb_options="-q -F -S" # --succinct
+        echo "Checking $output with silfont"
         fontbakery check-profile silfont.fbtests.profile $output/*.$flavor --html $output/silfont.html $fb_options
+        echo "Checking $output with googlefonts"
         fontbakery check-googlefonts $output/*.$flavor --html $output/googlefonts.html $fb_options
     done
     exit 0
@@ -194,6 +198,13 @@ else
     export FONTTOOLS_LOOKUP_DEBUGGING=1
 fi
 
+if [ "$mode" == "vbuild" ]
+then
+    rm source/stat.yaml tirobuild.yaml
+    mode=make
+    submode=variable
+fi
+
 if [ "$mode" == "make" ]
 then
     if [ -d source/masters ]
@@ -202,17 +213,17 @@ then
         do
             if [ -f $dspace ]
             then
-                if [ "$2" == "otf" -o -z "$2" ]
+                if [ "$submode" == "otf" -o -z "$submode" ]
                 then
                     echo "building otf instance fonts from $dspace"
                     fontmake -m $dspace --keep-overlaps --check-compatibility -i -o otf
                 fi
-                if [ "$2" == "ttf" -o -z "$2" ]
+                if [ "$submode" == "ttf" -o -z "$submode" ]
                 then
                     echo "building ttf instance fonts from $dspace"
                     fontmake -m $dspace --keep-overlaps --check-compatibility -i -o ttf
                 fi
-                if [ "$2" == "variable" -o -z "$2" ]
+                if [ "$submode" == "variable" -o -z "$submode" ]
                 then
                     echo "building variable font from $dspace"
                     if [ -x prevariable ]
@@ -220,7 +231,10 @@ then
                         echo "running prevariable"
                         ./prevariable
                     fi
+                fi
 
+                if [ -f source/stat.yaml ]
+                then
                     echo "smith flow (sf)"
                     designpath=${dspace%-VF.designspace}
                     designfile=${designpath#source/}
@@ -269,33 +283,36 @@ then
             rm -rf vresults
             mkdir gf_ttf gr_ttf vresults
 
-            pushd gf/variable
-            for ttf in *.ttf
+            for google in gf/*
             do
-                for dir in ../../g?_ttf
+                pushd $google
+                for sfnt in *.*
                 do
-                    cp -v $ttf $dir
+                    for dir in ../../g?_ttf
+                    do
+                        cp -v $sfnt $dir
+                    done
                 done
+                popd
             done
-            popd
 
             pushd gf_ttf
-            for ttf in *.ttf
+            for sfnt in *.*
             do
-                familyname=$(echo $ttf | cut -d- -f 1)
-                gftools fix-family --inplace --rename-family "${familyname} GF" $ttf
-                mv -v $ttf ${ttf/VF/GF}
+                familyname=$(echo $sfnt | cut -d- -f 1)
+                gftools fix-family --inplace --rename-family "${familyname} GF" $sfnt
+                mv -v $sfnt ${sfnt/VF/GF}
             done
             popd
 
             pushd gr_ttf
-            for ttf in *.ttf
+            for sfnt in *.*
             do
-                familyname=$(echo $ttf | cut -d- -f 1)
+                familyname=$(echo $sfnt | cut -d- -f 1)
 
-                rename=${ttf/VF/GR}
+                rename=${sfnt/VF/GR}
                 cleaner=${rename/\[wght\]/}
-                mv -v $ttf $cleaner
+                mv -v $sfnt $cleaner
 
                 cleanest=${cleaner/-GR/}
                 cp -v $cleaner ../vresults/$cleanest
@@ -303,6 +320,17 @@ then
                 gftools fix-family --inplace --rename-family "${familyname} GR" $cleaner
             done
             popd
+
+            pushd vresults
+            mkdir web
+            mv -v *.woff2 web
+            popd
+
+            if [ -x postvariable ]
+            then
+                echo "running postvariable"
+                ./postvariable
+            fi
         fi
         if [ -d output ]
         then
@@ -344,11 +372,11 @@ then
         fi
     done
 
-    for www in web woff
+    for www in *results/w*
     do
-        if [ -d results/$www ]
+        if [ -d $www ]
         then
-            cp -v results/$www/*.woff2 $guest/web
+            cp -v $www/*.woff2 $guest/web
         fi
     done
 
@@ -376,7 +404,7 @@ then
     # InDesign
     folder="$HOME/guest/Document Fonts"
     rsync -v -a --delete $ref/ "$folder"
-    cp -v ../results/*.ttf "$folder"
+    cp -v ../results/*.ttf ../results/*/*.ttf ../*_?tf/*.?tf "$folder"
 
     # plain text
     if [ -d generated ]
@@ -423,7 +451,7 @@ then
     fi
 
     # web apps
-    ln -v -f web/*.html web/*.css tools/*.html $ref/*VF* $ht $guest/web
+    ln -v -f web/*.html web/*.css tools/*.html $var/* $ht $guest/web
 
     pushd tests
 
