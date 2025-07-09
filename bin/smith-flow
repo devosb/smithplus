@@ -5,7 +5,7 @@ submode="$2"
 prj=$(basename $PWD)
 
 # export SILE_PATH=/mnt/builds/fontproof
-export CTR_UHB=1
+# export CTR_UHB=0
 guest=$HOME/guest
 priv=../$prj-private
 locl=${PWD/ci\//}-local
@@ -21,6 +21,16 @@ wl=$guest/wordlist.txt
 if [ ! -d $ref ]
 then
     echo "Dev directory $ref does not exist"
+fi
+
+if [ ! -d $var ]
+then
+    echo "Dev directory $var does not exist"
+fi
+
+if [ ! -d $cmp ]
+then
+    echo "Dev directory $cmp does not exist"
 fi
 
 if [ -f $rc ]
@@ -66,7 +76,7 @@ fi
 
 if [ "$mode" == "bisect" ]
 then
-    repo="$2"
+    repo="$submode"
     if [ -d "$repo" ]
     then
         pushd $repo
@@ -174,18 +184,19 @@ fi
 
 if [ "$mode" == "fontbakery" ]
 then
+    fontbakery check-googlefonts variable_ttf/*.ttf --html variable_ttf/fontbakery.html -q -F -S # --succinct
+    exit 0
+fi
+
+if [ "$mode" == "fontspector" ]
+then
     for output in *_?tf
     do
         if [ ! -d $output ]
         then
             continue
         fi
-        flavor=$(echo $output | cut -d _ -f 2)
-        fb_options="-q -F -S" # --succinct
-        echo "Checking $output with silfont"
-        fontbakery check-profile silfont.fbtests.profile $output/*.$flavor --html $output/silfont.html $fb_options
-        echo "Checking $output with googlefonts"
-        fontbakery check-googlefonts $output/*.$flavor --html $output/googlefonts.html $fb_options
+        fontspector -q --full-lists -p googlefonts --html $output/fontspector.html $output/*.ttf
     done
     exit 0
 fi
@@ -209,10 +220,19 @@ if [ "$mode" == "make" ]
 then
     if [ -d source/masters ]
     then
-        for dspace in source/*-VF.designspace
+        for designspace in source/variable/*.designspace
         do
-            if [ -f $dspace ]
+            if [ -f $designspace ]
             then
+                if [ -x prevariable ]
+                then
+                    echo "running prevariable"
+                    ./prevariable
+                fi
+
+                dspace=${designspace/.designspace/-VF.designspace}
+                cp -v $designspace $dspace
+
                 if [ "$submode" == "otf" -o -z "$submode" ]
                 then
                     echo "building otf instance fonts from $dspace"
@@ -223,23 +243,14 @@ then
                     echo "building ttf instance fonts from $dspace"
                     fontmake -m $dspace --keep-overlaps --check-compatibility -i -o ttf
                 fi
-                if [ "$submode" == "variable" -o -z "$submode" ]
-                then
-                    echo "building variable font from $dspace"
-                    if [ -x prevariable ]
-                    then
-                        echo "running prevariable"
-                        ./prevariable
-                    fi
-                fi
 
                 if [ -f source/stat.yaml ]
                 then
                     echo "smith flow (sf)"
                     designpath=${dspace%-VF.designspace}
-                    designfile=${designpath#source/}
+                    designfile=${designpath#source/variable/}
                     outfile=${designfile}.ttf
-                    fontmake -m $dspace --output-path $outfile -o variable # --feature-writer None
+                    fontmake -m $dspace --output-path $outfile -o variable --feature-writer None # --verbose DEBUG
                     familyname=$(otfinfo -a $outfile)
                     vardir=sf
                     varbase=${vardir}/${designfile}-SF
@@ -258,7 +269,7 @@ then
             fi
         done
 
-        if [ "$2" == "variable" -o -z "$2" ]
+        if [ "$submode" == "variable" -o -z "$submode" ]
         then
             if [ -f googlefonts.yaml ]
             then
@@ -312,6 +323,7 @@ then
 
                 rename=${sfnt/VF/GR}
                 cleaner=${rename/\[wght\]/}
+                cleaner=${cleaner/\[wdth,wght\]/}
                 mv -v $sfnt $cleaner
 
                 cleanest=${cleaner/-GR/}
@@ -453,6 +465,12 @@ then
     # web apps
     ln -v -f web/*.html web/*.css tools/*.html $var/* $ht $guest/web
 
+    interpolate=""
+    if [ -d source/masters ]
+    then
+        interpolate="-i"
+    fi
+
     pushd tests
 
     # windows apps
@@ -468,7 +486,7 @@ then
         fi
     done
 
-    ftml2txt -o $guest -s $HOME/script/SP1 *.ftml
+    ftml2txt $interpolate -o $guest -s $HOME/script/SP1 *.ftml
     for ftml in *.ftml
     do
         if [ -f $ftml ]
@@ -582,7 +600,7 @@ fi
 
 if [ "$mode" == "version" ]
 then
-    version="$2"
+    version="$submode"
     for ufo in source/*.ufo source/masters/*.ufo
     do
         if [ -d $ufo ]

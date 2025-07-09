@@ -1,11 +1,20 @@
 #!/bin/bash
 
-slug="$1"
+slug="${1%.}"
 dir=$(dirname $PWD)
 prj=$(basename $dir -local)
 dev=../references
-unzip -d zip ${slug}.zip
-tar -Jxf ${slug}.tar.xz
+
+# test
+if [ ! -f ${slug}.zip ]
+then
+    echo "${slug}.zip does not exist"
+    exit 1
+fi
+unzip -q -d zip ${slug}.zip
+tarball=${slug}.tar.xz
+tar -Jxf $tarball
+tar -Jtf $tarball | sort | uniq -d
 mkdir txz
 mv ${slug} txz
 for dir in zip/$slug txz/$slug $dev
@@ -15,9 +24,9 @@ do
     do
         if [ -f $ttf ]
         then
-            ttx $ttf
+            ttx -q $ttf
             root=$(basename $ttf .ttf)
-            $HOME/builds/fontations/target/debug/otexplorer $ttf > ${root}.ttr
+            otexplorer $ttf > ${root}.ttr
         fi
     done
     popd
@@ -27,6 +36,21 @@ diff -r $dev txz/$slug
 otfinfo -i txz/${slug}/*.ttf | grep Version:
 for ttf in txz/${slug}/*.ttf
 do
-    $HOME/builds/fontations/target/debug/otexplorer -t name $ttf | grep Version
+    otexplorer -t name $ttf | grep Version
 done
 rm -rf zip txz $dev/*.ttx $dev/*.ttr
+
+# sign
+if [ -f *SHA512SUMS* ]
+then
+    mv -v *SHA512SUMS* ${tarball}.sha512
+fi
+
+sha512sum -c ${tarball}.sha512
+
+if [ -f ${tarball}.asc ]
+then
+    gpg --verify ${tarball}.asc
+else
+    gpg --armor --detach-sign ${tarball}
+fi

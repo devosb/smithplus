@@ -49,7 +49,7 @@ pip3 install -r $SMITHHOME/requirements.txt
 
 # Show build timestamps
 pushd /run/shm
-ls -lt /usr/local/bin/ ~/builds/fontvalidator/bin
+ls -lt ~/builds/fontvalidator/bin /usr/local/bin/ ~/.cargo/bin
 find /usr/local/lib -name fontforge* -exec ls -l {} \;
 find /usr/local/lib -name psMat* -exec ls -l {} \;
 popd

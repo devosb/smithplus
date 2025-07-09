@@ -10,16 +10,10 @@ do
 done
 
 # report on each set of font families (often there is only one family)
-profile_settings="../tools/fbttfchecks.py"
-profile_option=""
-
 for family in ${families[*]}
 do
-    if [ -f $profile_settings ]
-    then
-        profile_option="--profile $profile_settings"
-    fi
-    fontbakery check-profile silfont.fbtests.profile $family-*.ttf --html $family-fbchecks.html -F --succinct -S
+    fontbakery check-profile silfont.fbtests.profile $family-*.ttf --html $family-fontbakery.html -q -F -S # --succinct
+    fontspector -q --full-lists --use-python -p ~/builds/fontspector-local/profiles/silfonts.toml --html $family-fontspector.html $family-*.ttf
 done
 
 popd
