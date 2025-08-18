@@ -220,18 +220,20 @@ if [ "$mode" == "make" ]
 then
     if [ -d source/masters ]
     then
-        for designspace in source/variable/*.designspace
+        for dspace in source/*-VF.designspace
         do
-            if [ -f $designspace ]
+            if [ -f $dspace ]
             then
                 if [ -x prevariable ]
                 then
                     echo "running prevariable"
-                    ./prevariable
+                    source prevariable
                 fi
-
-                dspace=${designspace/.designspace/-VF.designspace}
-                cp -v $designspace $dspace
+                for fea in source/masters/*.ufo/*.fea
+                do
+                    sed 's/.null//g' $fea > features.fea
+                    mv -v features.fea $fea
+                done
 
                 if [ "$submode" == "otf" -o -z "$submode" ]
                 then
@@ -248,7 +250,7 @@ then
                 then
                     echo "smith flow (sf)"
                     designpath=${dspace%-VF.designspace}
-                    designfile=${designpath#source/variable/}
+                    designfile=${designpath#source/}
                     outfile=${designfile}.ttf
                     fontmake -m $dspace --output-path $outfile -o variable --feature-writer None # --verbose DEBUG
                     familyname=$(otfinfo -a $outfile)
@@ -274,7 +276,7 @@ then
             if [ -f googlefonts.yaml ]
             then
                 echo "Google Fonts (gf)"
-                gftools builder googlefonts.yaml
+                gftools builder $GFTOOLS_BUILDER googlefonts.yaml
             fi
 
             if [ -f tirobuild.yaml ]
