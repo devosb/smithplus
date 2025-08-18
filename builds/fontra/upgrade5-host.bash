@@ -1,4 +1,3 @@
-sudo n latest
 rm -rf venv
 python3 -m venv venv --prompt=fontra
 source venv/bin/activate
