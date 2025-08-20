@@ -39,18 +39,4 @@ do
     otexplorer -t name $ttf | grep Version
 done
 rm -rf zip txz $dev/*.ttx $dev/*.ttr
-
-# sign
-if [ -f *SHA512SUMS* ]
-then
-    mv -v *SHA512SUMS* ${tarball}.sha512
-fi
-
-sha512sum -c ${tarball}.sha512
-
-if [ -f ${tarball}.asc ]
-then
-    gpg --verify ${tarball}.asc
-else
-    gpg --armor --detach-sign ${tarball}
-fi
+sha512sum -c SHA512SUMS.txt
