@@ -12,8 +12,8 @@ done
 # report on each set of font families (often there is only one family)
 for family in ${families[*]}
 do
-    fontbakery check-profile silfont.fbtests.profile $family-*.ttf --html $family-fontbakery.html -q -F -S # --succinct
-    fontspector -q --full-lists --use-python -p ~/builds/fontspector-local/profiles/silfonts.toml --html $family-fontspector.html $family-*.ttf
+    fontbakery check-profile silfont.fbtests.profile $family-*.ttf --html $family-fontbakery.html -F -S --succinct # -q
+    fontspector --succinct --full-lists -p ~/script/silfonts.toml --html $family-fontspector.html $family-*.ttf # --use-python
 done
 
 popd

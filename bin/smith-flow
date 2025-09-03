@@ -231,8 +231,11 @@ then
                 fi
                 for fea in source/masters/*.ufo/*.fea
                 do
-                    sed 's/.null//g' $fea > features.fea
-                    mv -v features.fea $fea
+                    if [ -f $fea ]
+                    then
+                        sed 's/.null//g' $fea > features.fea
+                        mv -v features.fea $fea
+                    fi
                 done
 
                 if [ "$submode" == "otf" -o -z "$submode" ]

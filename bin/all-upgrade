@@ -10,7 +10,7 @@ sudo pip3 install --break-system-packages --upgrade ninja meson
 # vn -i
 # vn pip install --upgrade pip toml flit packaging wheel setuptools tox Pillow urllib3
 # vn pip install --upgrade ninja meson
-
+rustup update
 volta install node@latest
 
 locations=host
