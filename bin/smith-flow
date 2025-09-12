@@ -182,21 +182,36 @@ then
     exit 0
 fi
 
-if [ "$mode" == "fontbakery" ]
+if [ "$mode" == "var" ]
 then
-    fontbakery check-googlefonts variable_ttf/*.ttf --html variable_ttf/fontbakery.html -q -F -S # --succinct
+    pushd variable_ttf
+    fontbakery check-googlefonts *.ttf --html fontbakery.html -q -F -S # --succinct
+    fontspector -q --full-lists -p ~/script/variable.toml --html fontspector.html *.ttf
+    for ttf in *.ttf
+    do
+        echo "Checking $ttf"
+        stem=${ttf%.ttf}
+        fonttools varLib.interpolatable --html fonttools-$stem.html $ttf
+        interpolatable $ttf
+        echo "much more detail: fonttools varLib.interpolatable --show-all $ttf"
+    done
+    popd
     exit 0
 fi
 
-if [ "$mode" == "fontspector" ]
+if [ "$mode" == "qa" -o "$mode" == "qas" ]
 then
-    for output in *_?tf
+    for output in *_?tf results
     do
         if [ ! -d $output ]
         then
             continue
         fi
         fontspector -q --full-lists -p googlefonts --html $output/fontspector.html $output/*.ttf
+        if [ "$mode" == "qas" ]
+        then
+            fontbakery check-googlefonts $output/*.ttf --html $output/fontbakery.html -q -F -S # --succinct
+        fi
     done
     exit 0
 fi

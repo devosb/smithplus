@@ -1,7 +1,12 @@
 #!/bin/bash
 
-fontbakery check-profile silfont.fbtests.profile "$@" --json fb.json -q
-fontspector -q -p ~/script/silfonts.toml --json fs.json "$@"
+# run checks
+fontbakery check-profile silfont.fbtests.profile "$@" --json fb-exec.json -q
+fontspector -q -p silfonts.toml --json fs-exec.json "$@"
 
-grep FontBakeryCheck fb.json | cut -d\: -f2 | sed 's/>",//g' | sort > fb.txt
-grep check_id fs.json | cut -d\: -f2 | sed 's/ "//g' | sed 's/",//g' | sort > fs.txt
+grep FontBakeryCheck fb-exec.json | cut -d\: -f2 | sed 's/>",//g' | sort > fb-exec.txt
+grep check_id fs-exec.json | cut -d\: -f2 | sed 's/ "//g' | sed 's/",//g' | sort > fs-exec.txt
+
+# list checks
+fontbakery check-profile silfont.fbtests.profile -L | sort > fb-list.txt
+fontspector -p silfonts.toml --list-checks-json | grep id\": | cut -d\: -f2 | sed 's/ "//g' | sed 's/",//g' | sort > fs-list.txt
