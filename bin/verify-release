@@ -3,7 +3,7 @@
 slug="${1%.}"
 dir=$(dirname $PWD)
 prj=$(basename $dir -local)
-dev=../references
+dev=../../references
 
 # test
 if [ ! -f ${slug}.zip ]

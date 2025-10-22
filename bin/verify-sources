@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# check GlyphsApp roundtrip
+./preglyphs
+./preflightg
+
+# check UFOs
+for ufo in source/*.ufo source/masters/*.ufo
+do
+    if [ -d $ufo ]
+    then
+        ufolint $ufo
+        psfcheckbasicchars $ufo
+    fi
+done
+
+# check project
+if [ -d source/masters ]
+then
+    for dspace in source/*-VF.designspace
+    do
+        psfcheckproject $dspace
+    done
+else
+    for dspace in source/*.designspace
+    do
+        psfcheckproject $dspace
+    done
+fi

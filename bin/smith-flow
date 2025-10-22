@@ -393,11 +393,11 @@ fi
 
 if [ "$mode" == "install" -o "$mode" == "windows" -o "$mode" == "apple" ]
 then
-    for sfnt in results/*.ttf results/*/*.ttf *_?tf/*.?tf
+    for sfnt in results/*.ttf results/*/*.ttf *_?tf/*.?tf vresults/*.ttf
     do
         if [ -f $sfnt ]
         then
-            for dir in $guest/xtf /mnt/fonts $guest
+            for dir in $guest/xtf $guest # /mnt/fonts
             do
                 cp -v $sfnt $dir
             done
@@ -412,14 +412,29 @@ then
         fi
     done
 
+    interpolate=""
+    if [ -d source/masters ]
+    then
+        interpolate="-i"
+    fi
+
+    pushd tests
+    for ftml in *.ftml
+    do
+        stem=${ftml%.ftml}
+        odt=$guest/$stem.odt
+        if [ $ftml -nt $odt ]
+        then
+            ftml2odt $ftml $odt
+            ftml2txt $interpolate -o $guest $ftml
+            unix2dos -n $guest/txt/$stem.txt $guest/$stem.txt
+            cp $guest/txt/$stem.txt generated/$stem.htxt
+        fi
+    done
+    popd
+
     if [ "$mode" != "apple" ]
     then
-        pushd tests
-        for ftml in *.ftml
-        do
-            ftml2odt ${ftml%.ftml}
-        done
-        popd
         rsync -v -a --delete documentation $guest
     fi
 
@@ -431,12 +446,12 @@ fi
 
 if [ "$mode" == "windows" ]
 then
-    pushd tests
-
     # InDesign
     folder="$HOME/guest/Document Fonts"
+    cp -v results/*.ttf results/*/*.ttf *_?tf/*.?tf vresults/*.ttf "$folder"
+
+    pushd tests
     rsync -v -a --delete $ref/ "$folder"
-    cp -v ../results/*.ttf ../results/*/*.ttf ../*_?tf/*.?tf "$folder"
 
     # plain text
     if [ -d generated ]
@@ -477,19 +492,19 @@ then
     rm -rf $guest/{xtf,txt,web,sfm,pdfs,sile}
     mkdir -p $guest/{xtf,txt,web,sfm,pdfs,sile}
 
-    if [ -x makeftml ]
-    then
-        ./makeftml
-    fi
+    for genftml in tools tools/bin
+    do
+        if [ $genftml/psfgenftml.py -nt tests/allchars.ftml ]
+        then
+            if [ -x makeftml ]
+            then
+                ./makeftml
+            fi
+        fi
+    done
 
     # web apps
     ln -v -f web/*.html web/*.css tools/*.html $var/* $ht $guest/web
-
-    interpolate=""
-    if [ -d source/masters ]
-    then
-        interpolate="-i"
-    fi
 
     pushd tests
 
@@ -507,13 +522,6 @@ then
     done
 
     ftml2txt $interpolate -o $guest -s $HOME/script/SP1 *.ftml
-    for ftml in *.ftml
-    do
-        if [ -f $ftml ]
-        then
-            cp $guest/txt/${ftml%.ftml}.txt generated/${ftml%.ftml}.htxt
-        fi
-    done
 
     cp /dev/null $wl
 
