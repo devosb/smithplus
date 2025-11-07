@@ -1,3 +1,6 @@
+rustup default nightly
+rustup component add rust-src # --toolchain nightly # -x86_64-unknown-linux-gnu
+cargo install bindgen-cli
 sudo rm -rf build
 
 # On Ubuntu J... look at https://github.com/harfbuzz/harfbuzz/issues/3164#event-5302802120 for issues with ragel
@@ -6,7 +9,7 @@ sudo rm -rf build
 
 if [ -f meson.build ]
 then
-    meson setup build -Dgraphite2=enabled -Dauto_features=enabled -Ddocs=disabled -Dexperimental_api=true
+    meson setup build -Dgraphite2=enabled -Dauto_features=enabled -Ddocs=disabled -Dexperimental_api=true -Dbenchmark=enabled -Dharfrust=enabled -Dbuildtype=release
     # meson setup build -Dauto_features=enabled -Dwasm=enabled -Ddocs=disabled
     meson compile -C build
     # ninja -C build
@@ -26,3 +29,4 @@ else
 fi
 
 sudo ldconfig
+rustup default stable

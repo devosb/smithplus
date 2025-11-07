@@ -13,7 +13,10 @@ done
 for family in ${families[*]}
 do
     fontbakery check-profile silfont.fbtests.profile $family-*.ttf --html $family-fontbakery.html -F -S --succinct # -q
-    fontspector --succinct --full-lists -p ~/script/silfonts.toml --html $family-fontspector.html $family-*.ttf # --use-python
+    for mode in add sub
+    do
+        fontspector --succinct --full-lists -p ~/script/silfonts-$mode.toml --html $family-fontspector-$mode.html $family-*.ttf # --use-python
+    done
 done
 
 popd

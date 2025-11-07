@@ -146,7 +146,12 @@ then
     done
     if [ -d results ]
     then
-        $HOME/.local/bin/smith validate
+        # $HOME/.local/bin/smith validate
+        for ttf in results/*.ttf
+        do
+            fontval $ttf &
+        done
+        wait
     fi
     exit 0
 fi
@@ -403,14 +408,7 @@ then
             done
         fi
     done
-
-    for www in *results/w*
-    do
-        if [ -d $www ]
-        then
-            cp -v $www/*.woff2 $guest/web
-        fi
-    done
+    cp -v *results/web/*.woff2 $guest/web
 
     interpolate=""
     if [ -d source/masters ]
