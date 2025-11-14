@@ -398,7 +398,7 @@ fi
 
 if [ "$mode" == "install" -o "$mode" == "windows" -o "$mode" == "apple" ]
 then
-    for sfnt in results/*.ttf results/*/*.ttf *_?tf/*.?tf vresults/*.ttf
+    for sfnt in results/*.ttf *_?tf/*.?tf vresults/*.ttf # results/*/*.ttf
     do
         if [ -f $sfnt ]
         then
@@ -446,7 +446,7 @@ if [ "$mode" == "windows" ]
 then
     # InDesign
     folder="$HOME/guest/Document Fonts"
-    cp -v results/*.ttf results/*/*.ttf *_?tf/*.?tf vresults/*.ttf "$folder"
+    cp -v results/*.ttf *_?tf/*.?tf vresults/*.ttf "$folder" # results/*/*.ttf
 
     pushd tests
     rsync -v -a --delete $ref/ "$folder"
@@ -580,14 +580,14 @@ fi
 if [ "$mode" == "reference" ]
 then
     pushd results
-    for ttf in *.ttf */*.ttf
+    for ttf in *.ttf # */*.ttf
     do
         if [ -f $ttf ]
         then
             rsync -v -a -R $ttf $ref
         fi
     done
-    for ttf in tests/ftml/fonts/*.ttf tests/ftml/fonts/*/*.ttf
+    for ttf in tests/ftml/fonts/*.ttf # tests/ftml/fonts/*/*.ttf
     do
         if [ -f $ttf ]
         then
@@ -597,7 +597,7 @@ then
     popd
 
     pushd $ref
-    ls -l -t *.ttf */*.ttf
+    ls -l -t *.ttf # */*.ttf
     popd
 
     exit 0
@@ -667,7 +667,7 @@ shift
 $HOME/.local/bin/smith "$mode" "$@" $FLOWARGS
 
 # flatten test directory hierarchy
-if [ "$mode" == "test" ]
+if [ "$mode" == "ptest" ]
 then
     pushd results/tests/test
     for html in */*.html
