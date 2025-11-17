@@ -240,7 +240,7 @@ if [ "$mode" == "make" ]
 then
     if [ -d source/masters ]
     then
-        for dspace in source/*-VF.designspace
+        for dspace in source/variable/*.designspace
         do
             if [ -f $dspace ]
             then
@@ -272,24 +272,18 @@ then
                 if [ -f source/stat.yaml ]
                 then
                     echo "smith flow (sf)"
-                    designpath=${dspace%-VF.designspace}
-                    designfile=${designpath#source/}
+                    designpath=${dspace%.designspace}
+                    designfile=${designpath#source/variable/}
                     outfile=${designfile}.ttf
                     fontmake -m $dspace --output-path $outfile -o variable --feature-writer None # --verbose DEBUG
-                    familyname=$(otfinfo -a $outfile)
                     vardir=sf
-                    varbase=${vardir}/${designfile}-SF
+                    varbase=${vardir}/${designfile}
                     varttf=${varbase}.ttf
                     varweb=${varbase}.woff2
                     mkdir -p $vardir
-                    for ttf in *.ttf
-                    do
-                        familyname=$(otfinfo -a $ttf)
-                        ttfname -n "${familyname} SF" $ttf $varttf
-                        gftools gen-stat --inplace --src source/stat.yaml $varttf
-                        psfwoffit -m source/*-WOFF-metadata.xml --woff2 $varweb $varttf
-                        rm $ttf
-                    done
+                    cp $outfile $varttf
+                    gftools gen-stat --inplace --src source/stat.yaml $varttf
+                    psfwoffit -m source/*-WOFF-metadata.xml --woff2 $varweb $varttf
                 fi
             fi
         done
@@ -316,8 +310,7 @@ then
         fi
         if [ -d gf ]
         then
-            rm -rf vresults
-            mkdir gf_ttf gr_ttf vresults
+            mkdir gf_ttf gr_ttf
 
             for google in gf/*
             do
@@ -332,48 +325,27 @@ then
                 popd
             done
 
-            pushd gf_ttf
-            for sfnt in *.*
-            do
-                familyname=$(echo $sfnt | cut -d- -f 1)
-                gftools fix-family --inplace --rename-family "${familyname} GF" $sfnt
-                mv -v $sfnt ${sfnt/VF/GF}
-            done
-            popd
-
             pushd gr_ttf
             for sfnt in *.*
             do
-                familyname=$(echo $sfnt | cut -d- -f 1)
-
-                rename=${sfnt/VF/GR}
-                cleaner=${rename/\[wght\]/}
+                cleaner=${sfnt/\[wght\]/}
                 cleaner=${cleaner/\[wdth,wght\]/}
                 mv -v $sfnt $cleaner
-
-                cleanest=${cleaner/-GR/}
-                cp -v $cleaner ../vresults/$cleanest
-
-                gftools fix-family --inplace --rename-family "${familyname} GR" $cleaner
             done
             popd
-
-            pushd vresults
-            mkdir web
-            mv -v *.woff2 web
-            popd
-
-            if [ -x postvariable ]
-            then
-                echo "running postvariable"
-                ./postvariable
-            fi
         fi
         if [ -d output ]
         then
             mkdir tb_ttf
             cp -v output/tirobuild/*/TTFVF/*.ttf tb_ttf
         fi
+
+        rm vresults
+        ln -s gr_ttf vresults
+        pushd vresults
+        mkdir web
+        mv -v *.woff2 web
+        popd
 
         for output in instance_*
         do
@@ -398,17 +370,15 @@ fi
 
 if [ "$mode" == "install" -o "$mode" == "windows" -o "$mode" == "apple" ]
 then
-    for sfnt in results/*.ttf *_?tf/*.?tf vresults/*.ttf # results/*/*.ttf
+    for dir in $guest/xtf $guest
     do
-        if [ -f $sfnt ]
-        then
-            for dir in $guest/xtf $guest # /mnt/fonts
-            do
-                cp -v $sfnt $dir
-            done
-        fi
+        # smith
+        cp -v results/*.ttf $dir
+
+        # fontmake
+        cp -a *_?tf $dir
     done
-    cp -v *results/web/*.woff2 $guest/web
+    cp -v results/web/*.woff2 $guest/web
 
     interpolate=""
     if [ -d source/masters ]
@@ -446,10 +416,10 @@ if [ "$mode" == "windows" ]
 then
     # InDesign
     folder="$HOME/guest/Document Fonts"
-    cp -v results/*.ttf *_?tf/*.?tf vresults/*.ttf "$folder" # results/*/*.ttf
 
     pushd tests
     rsync -v -a --delete $ref/ "$folder"
+    cp -v ../results/*.ttf "$folder"
 
     # plain text
     if [ -d generated ]
