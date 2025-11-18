@@ -275,13 +275,13 @@ then
                     designpath=${dspace%.designspace}
                     designfile=${designpath#source/variable/}
                     outfile=${designfile}.ttf
-                    fontmake -m $dspace --output-path $outfile -o variable --feature-writer None # --verbose DEBUG
+                    fontmake -m $dspace --output-path $outfile -o variable --feature-writer None --filter DecomposeTransformedComponentsFilter # --verbose DEBUG
                     vardir=sf
                     varbase=${vardir}/${designfile}
                     varttf=${varbase}.ttf
                     varweb=${varbase}.woff2
                     mkdir -p $vardir
-                    cp $outfile $varttf
+                    gftools fix-font --include-source-fixes -o $varttf $outfile
                     gftools gen-stat --inplace --src source/stat.yaml $varttf
                     psfwoffit -m source/*-WOFF-metadata.xml --woff2 $varweb $varttf
                 fi
