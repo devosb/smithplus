@@ -274,16 +274,12 @@ then
                     echo "smith flow (sf)"
                     designpath=${dspace%.designspace}
                     designfile=${designpath#source/variable/}
-                    outfile=${designfile}.ttf
+                    outfile=${designpath}.ttf
                     fontmake -m $dspace --output-path $outfile -o variable --feature-writer None --filter DecomposeTransformedComponentsFilter # --verbose DEBUG
                     vardir=sf
-                    varbase=${vardir}/${designfile}
-                    varttf=${varbase}.ttf
-                    varweb=${varbase}.woff2
+                    varttf=${vardir}/${designfile}.ttf
                     mkdir -p $vardir
                     gftools fix-font --include-source-fixes -o $varttf $outfile
-                    gftools gen-stat --inplace --src source/stat.yaml $varttf
-                    psfwoffit -m source/*-WOFF-metadata.xml --woff2 $varweb $varttf
                 fi
             fi
         done
@@ -305,46 +301,52 @@ then
 
         if [ -d sf ]
         then
-            mkdir sf_ttf
-            cp -v sf/*.ttf sf_ttf
+            gftools gen-stat -o sf_ttf sf/*.ttf
+            pushd sf_ttf
+            mkdir web
+            for ttf in *.ttf
+            do
+                family=${ttf%.ttf}
+                web=web/${family}.woff2
+                family=${family%-Italic}
+                for metadata in ../source/{${family},${family,,}}-WOFF-metadata.xml
+                do
+                    echo $metadata
+                    if [ -f $metadata ]
+                    then
+                        break
+                    fi
+                done
+                psfwoffit -m $metadata --woff2 $web $ttf
+            done
+            popd
         fi
         if [ -d gf ]
         then
-            mkdir gf_ttf gr_ttf
-
-            for google in gf/*
+            for dir in g{f,r}_ttf
             do
-                pushd $google
-                for sfnt in *.*
-                do
-                    for dir in ../../g?_ttf
-                    do
-                        cp -v $sfnt $dir
-                    done
-                done
-                popd
+                mkdir -p $dir/web
+                cp -v gf/variable/*.ttf $dir
+                cp -v gf/webfonts/*.woff2 $dir/web
             done
 
-            pushd gr_ttf
-            for sfnt in *.*
+            for sfnt in gr_ttf/*.ttf gr_ttf/web/*.woff2
             do
                 cleaner=${sfnt/\[wght\]/}
                 cleaner=${cleaner/\[wdth,wght\]/}
                 mv -v $sfnt $cleaner
             done
-            popd
         fi
         if [ -d output ]
         then
-            mkdir tb_ttf
+            mkdir -p tb_ttf/web
             cp -v output/tirobuild/*/TTFVF/*.ttf tb_ttf
+            cp -v output/tirobuild/*/TTFVFWOFF2/*.woff2 tb_ttf/web
         fi
 
-        rm vresults
+        rm -f vresults
         ln -s gr_ttf vresults
         pushd vresults
-        mkdir web
-        mv -v *.woff2 web
         popd
 
         for output in instance_*
