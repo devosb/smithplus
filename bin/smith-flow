@@ -212,7 +212,7 @@ then
         then
             continue
         fi
-        fontspector -q --full-lists -p googlefonts --html $output/fontspector.html $output/*.ttf
+        fontspector -q --full-lists -p ~/script/mostlyall.toml --html $output/fontspector.html $output/*.ttf
         if [ "$mode" == "qas" ]
         then
             fontbakery check-googlefonts $output/*.ttf --html $output/fontbakery.html -q -F -S # --succinct

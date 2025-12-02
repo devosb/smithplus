@@ -1,12 +1,18 @@
 #!/bin/bash
 
 # run checks
-fontbakery check-profile silfont.fbtests.profile "$@" --json fb-exec.json -q
-fontspector -q -p silfonts.toml --json fs-exec.json "$@"
-
-grep FontBakeryCheck fb-exec.json | cut -d\: -f2 | sed 's/>",//g' | sort > fb-exec.txt
-grep check_id fs-exec.json | cut -d\: -f2 | sed 's/ "//g' | sed 's/",//g' | sort > fs-exec.txt
+fontbakery check-profile silfont.fbtests.profile "$@" --json fb.json -q
+grep FontBakeryCheck fb.json | cut -d\: -f2 | sed 's/>//g' | sort > fb.txt
+for mode in add sub
+do
+    fontspector -q -p ../silfonts-$mode.toml --json fs-$mode.json "$@"
+    grep check_id fs-$mode.json | cut -d\: -f2 | sed 's/ "/"/g' | sort > fs-$mode.txt
+done
 
 # list checks
-fontbakery check-profile silfont.fbtests.profile -L | sort > fb-list.txt
-fontspector -p silfonts.toml --list-checks-json | grep id\": | cut -d\: -f2 | sed 's/ "//g' | sed 's/",//g' | sort > fs-list.txt
+
+# With fontspector and excluding checks the resulting list does not seem to be correct,
+# that is, the excluded checks are still in the resulting list.
+
+# fontbakery check-profile silfont.fbtests.profile -L | sort > fb-list.txt
+# fontspector -p silfonts.toml --list-checks-json | grep id\": | cut -d\: -f2 | sed 's/ "//g' | sed 's/",//g' | sort > fs-list.txt
