@@ -1,7 +1,6 @@
 pytest
 Cython
 PyICU
-weasyprint
 psautohint
 
 # font bakery

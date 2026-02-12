@@ -15,6 +15,9 @@ then
     # vn -i
     # vn pip install --upgrade pip toml flit packaging wheel setuptools tox Pillow urllib3
     # vn pip install --upgrade ninja meson
+
+    pip3 install -r $SMITHHOME/requirements.txt
+    # vn pip install -r $SMITHHOME/requirements.txt
 fi
 
 rustup update
@@ -45,9 +48,6 @@ do
 done
 sudo ldconfig
 
-pip3 install -r $SMITHHOME/requirements.txt
-# vn pip install -r $SMITHHOME/requirements.txt
-
 # Show build timestamps
 pushd /run/shm
 ls -lt ~/builds/fontvalidator/bin /usr/local/bin/ ~/.cargo/bin
@@ -56,5 +56,5 @@ find /usr/local/lib -name psMat* -exec ls -l {} \;
 popd
 
 # Use the latest fontTools
-$HOME/.local/bin/pip3 show fonttools
+pip3 show fonttools
 # vn pip show fonttools
