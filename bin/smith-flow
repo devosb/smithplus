@@ -231,7 +231,7 @@ fi
 
 if [ "$mode" == "vbuild" ]
 then
-    rm source/stat.yaml tirobuild.yaml
+    rm tirobuild.yaml # source/stat.yaml
     mode=make
     submode=variable
 fi
@@ -280,6 +280,9 @@ then
                     varttf=${vardir}/${designfile}.ttf
                     mkdir -p $vardir
                     gftools fix-font --include-source-fixes -o $varttf $outfile
+
+                    echo "smith make (sm)"
+                    gftools gen-stat --src source/stat.yaml -o sm_ttf $varttf
                 fi
             fi
         done
@@ -302,24 +305,28 @@ then
         if [ -d sf ]
         then
             gftools gen-stat -o sf_ttf sf/*.ttf
-            pushd sf_ttf
-            mkdir web
-            for ttf in *.ttf
+            for dir in s{f,m}_ttf
             do
-                family=${ttf%.ttf}
-                web=web/${family}.woff2
-                family=${family%-Italic}
-                for metadata in ../source/{${family},${family,,}}-WOFF-metadata.xml
+                pushd $dir
+                mkdir web
+                for ttf in *.ttf
                 do
-                    echo $metadata
-                    if [ -f $metadata ]
-                    then
-                        break
-                    fi
+                    family=${ttf%.ttf}
+                    web=web/${family}.woff2
+                    family=${family%-Italic}
+                    for metadata in ../source/{${family},${family,,}}-WOFF-metadata.xml
+                    do
+                        echo $metadata
+                        if [ -f $metadata ]
+                        then
+                            break
+                        fi
+                    done
+                    psfwoffit -m $metadata --woff2 $web $ttf
+                    rm -rf logs
                 done
-                psfwoffit -m $metadata --woff2 $web $ttf
+                popd
             done
-            popd
         fi
         if [ -d gf ]
         then
@@ -344,8 +351,20 @@ then
             cp -v output/tirobuild/*/TTFVFWOFF2/*.woff2 tb_ttf/web
         fi
 
+        # check STAT table
+        for dir in gr_ttf s{f,m}_ttf
+        do
+            for ttf in $dir/*.ttf
+            do
+                ttx -t STAT $ttf
+            done
+            echo "comparing gr_ttf to $dir"
+            diff -r gr_ttf $dir
+        done
+        md5sum ??_ttf/*.ttx | sort
+
         rm -f vresults
-        ln -s gr_ttf vresults
+        ln -s sm_ttf vresults
         pushd vresults
         popd
 
@@ -608,6 +627,34 @@ then
     done
     bumpversion --config-file $bv --allow-dirty --new-version "$version" major
     exit 0
+fi
+
+if [ "$mode" == "vtest" ]
+then
+    pushd results
+
+    # upright
+    for ttf in *.ttf
+    do
+        familyname=$(echo $ttf | cut -d - -f 1)
+        if [ -f $ttf ]
+        then
+            cp -p -v ../vresults/${familyname}.ttf $ttf
+        fi
+    done
+
+    # italic
+    for ttf in *Italic.ttf
+    do
+        familyname=$(echo $ttf | cut -d - -f 1)
+        if [ -f $ttf ]
+        then
+            cp -p -v ../vresults/${familyname}-Italic.ttf $ttf
+        fi
+    done
+
+    popd
+    mode=test
 fi
 
 big=$(echo $locl/tests)
