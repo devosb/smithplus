@@ -101,7 +101,17 @@ then
     do
         diffenator2 diff -fb ../references/$ttf -fa $ttf --user-wordlist $wl -o $guest
     done
+    diffenator2 proof *.ttf -o $guest
     popd
+    if [ -d verify ]
+    then
+        pushd verify
+        for ttf in *.ttf
+        do
+            diffenator2 diff -fb ../references/$ttf -fa $ttf --user-wordlist $wl -o $guest
+        done
+        popd
+    fi
     exit 0
 fi
 
@@ -366,6 +376,13 @@ then
         rm -f vresults
         ln -s sm_ttf vresults
         pushd vresults
+        for ttf in *.ttf
+        do
+            echo "no instance fonts for $ttf"
+            # --keep-everything --retain-gids --passthrough-tables
+            # hb-subset --variations="wght=400" $ttf -o ../verify/$familyname-Regular.ttf
+            # hb-subset --variations="wght=700" $ttf -o ../verify/$familyname-Bold.ttf
+        done
         popd
 
         for output in instance_*
