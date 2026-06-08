@@ -11,6 +11,7 @@ fi
 
 case $mode in
 start)
+    xhost +local:
     sudo lxc start $instance
     ;;
 stop)

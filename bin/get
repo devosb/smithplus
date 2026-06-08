@@ -20,5 +20,16 @@ then
     then
         echo "now running rsync $dir"
         rsync -v -a --delete $dir/ .
+    elif [ -f wscript ]
+    then
+        # get host
+        rsync -a -v $HOME/guest/knuth/source $PWD
+    elif [ $HOSTNAME = "knuth" ]
+    then
+        # get guest
+        rsync -a -v --delete $HOME/knuth/source $HOME
+        rsync -a -v --delete $HOME/knuth/fonts $HOME/.fonts
+    else
+        echo "unknown get workflow"
     fi
 fi

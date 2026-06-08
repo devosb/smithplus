@@ -1,5 +1,10 @@
 #!/bin/bash
-prj=$PWD
+prj=$HOME/source
+if [ -f wscript ]
+then
+    prj="--read-only $PWD"
+fi
+
 pushd $HOME/builds/fontra
 source venv/bin/activate
 fontra --launch filesystem $prj

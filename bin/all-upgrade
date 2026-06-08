@@ -7,7 +7,7 @@ rm -rf $HOME/.local/{bin,lib} $HOME/.cache/pip
 hash -r
 
 locations=host
-if [ $HOSTNAME = apple -o $HOSTNAME = fruit ]
+if [ $HOSTNAME = apple -o $HOSTNAME = emacs ]
 then
     locations=guest
     pip3 install --upgrade --user pip toml flit packaging wheel tox Pillow urllib3 # setuptools
@@ -18,6 +18,9 @@ then
 
     pip3 install -r $SMITHHOME/requirements.txt
     # vn pip install -r $SMITHHOME/requirements.txt
+elif [ $HOSTNAME = knuth ]
+then
+    locations=special
 fi
 
 rustup update
