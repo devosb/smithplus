@@ -1,5 +1,7 @@
 #!/bin/bash
 
+umask 077
+
 mode="$1"
 submode="$2"
 prj=$(basename $PWD)
@@ -16,7 +18,7 @@ dev=$locl/dev
 rc=$dev/smithrc
 ht=$dev/dev.css
 bv=$dev/bumpversion.cfg
-wl=$guest/wordlist.txt
+wl=$PWD/wordlist.txt
 
 if [ ! -d $ref ]
 then
@@ -92,6 +94,54 @@ then
         exit 0
         popd
     fi
+fi
+
+if [ "$mode" == "diff" -o "$mode" == "pdfs" -o "$mode" == "windows" -o "$mode" == "apple" ]
+then
+    interpolate=""
+    if [ -d source/masters ]
+    then
+        interpolate="-i"
+    fi
+
+    pushd tests
+    ftml2txt $interpolate -o $guest -s $HOME/script/SP1 *.ftml
+    popd
+fi
+
+if [ "$mode" == "diff" -o "$mode" == "pdfs" -o "$mode" == "windows" ]
+then
+    cp /dev/null $wl
+
+    pushd tests
+    mkdir generated
+
+    for htxt in *.htxt
+    do
+        if [ -f $htxt ]
+        then
+            unikey -o generated/${htxt%.htxt}-plain.txt $htxt
+        fi
+    done
+
+    for txt_file in *.txt generated/*.txt $guest/txt/*.txt
+    do
+        if [ -f $txt_file ]
+        then
+            if [ "$mode" == "windows" ]
+            then
+                txt=$(basename $txt_file)
+                unix2dos -n $txt_file $guest/$txt
+            fi
+
+            if [ "$mode" == "diff" ]
+            then
+                cat $txt_file | sed 's/ /\n/g' | sed 's/,//g' >> $wl
+            fi
+        fi
+    done
+
+    popd
 fi
 
 if [ "$mode" == "diff" ]
@@ -406,72 +456,44 @@ then
     exit 0
 fi
 
-if [ "$mode" == "install" -o "$mode" == "windows" -o "$mode" == "apple" ]
+if [ "$mode" == "docs" -o "$mode" == "apple" ]
 then
-    for dir in $guest/xtf $guest
-    do
-        # smith
-        cp -v results/*.ttf $dir
+    cp -v -p results/web/*.woff2 $guest/web
+fi
 
-        # fontmake
-        cp -a *_?tf $dir
-    done
-    cp -v results/web/*.woff2 $guest/web
+if [ "$mode" == "docs" ]
+then
+    ./makedocs
+    rsync -v -a --delete documentation $guest
+    exit 0
+fi
 
-    interpolate=""
-    if [ -d source/masters ]
-    then
-        interpolate="-i"
-    fi
+if [ "$mode" == "install" -o "$mode" == "windows" ]
+then
+    # smith
+    cp -v results/*.ttf $guest
 
-    pushd tests
-    for ftml in *.ftml
-    do
-        stem=${ftml%.ftml}
-        odt=$guest/$stem.odt
-        if [ $ftml -nt $odt ]
-        then
-            ftml2odt $ftml $odt
-            ftml2txt $interpolate -o $guest $ftml
-            unix2dos -n $guest/txt/$stem.txt $guest/$stem.txt
-            cp $guest/txt/$stem.txt generated/$stem.htxt
-        fi
-    done
-    popd
-
-    if [ "$mode" != "apple" ]
-    then
-        rsync -v -a --delete documentation $guest
-    fi
+    # fontmake
+    cp -a *_?tf results/variable $guest
 
     if [ "$mode" == "install" ]
     then
         exit 0
     fi
-fi
 
-if [ "$mode" == "windows" ]
-then
     # InDesign
     folder="$HOME/guest/Document Fonts"
-
-    pushd tests
     rsync -v -a --delete $ref/ "$folder"
-    cp -v ../results/*.ttf "$folder"
+    cp -v results/*.ttf "$folder"
 
-    # plain text
-    if [ -d generated ]
-    then
-        for txt_file in *.txt generated/*.txt
-        do
-            if [ -f $txt_file ]
-            then
-                txt=$(basename $txt_file)
-                unix2dos -n $txt_file $guest/$txt
-            fi
-        done
-    fi
-
+    # MS Word / LO Writer
+    pushd tests
+    for ftml in *.ftml
+    do
+        stem=${ftml%.ftml}
+        odt=$guest/$stem.odt
+        ftml2odt $stem $odt
+    done
     popd
 
     exit 0
@@ -479,13 +501,12 @@ fi
 
 if [ "$mode" == "apple" ]
 then
-    ssh-add -l
-    if [ $? -gt 0 ]
+    if [ -z "$S3BUCKET" ]
     then
-        ssh-add ~/.ssh/id_ed25519_home
+        echo "S3BUCKET is not specified"
+    else
+        rclone -v sync $guest/web apple:$S3BUCKET
     fi
-    chmod -R go+Xr $guest/web
-    rsync -v -a --delete $guest/web/ nrsi.sil.org:/var/www/fonts/
 
     exit 0
 fi
@@ -494,9 +515,11 @@ if [ "$mode" == "data" ]
 then
     touch .active $priv/.active
 
-    rm -f $guest/*.*
-    rm -rf $guest/{xtf,txt,web,sfm,pdfs,sile}
-    mkdir -p $guest/{xtf,txt,web,sfm,pdfs,sile}
+    pushd $guest || exit 1
+    rm -rf   *.* d*
+    rm -rf   {txt,web,sfm,pdfs,sile,knuth}
+    mkdir -p {txt,web,sfm,pdfs,sile,knuth}
+    popd
 
     for genftml in tools tools/bin
     do
@@ -512,42 +535,10 @@ then
     # web apps
     ln -v -f web/*.html web/*.css tools/*.html $var/* $ht $guest/web
 
-    pushd tests
-
     # windows apps
-    ln -v -f *.indd *.odt *.docx $guest
+    ln -v -f {tests,$priv/tests}/{*.indd,*.odt,*.docx} $guest
 
-    /bin/rm -rf generated
-    mkdir generated
-    for htxt in *.htxt
-    do
-        if [ -f $htxt ]
-        then
-            unikey -o generated/${htxt%.htxt}-plain.txt $htxt
-        fi
-    done
-
-    ftml2txt $interpolate -o $guest -s $HOME/script/SP1 *.ftml
-
-    cp /dev/null $wl
-
-    for txt_file in *.txt generated/*.txt
-    do
-        if [ -f $txt_file ]
-        then
-            cat $txt_file | sed 's/ /\n/g' | sed 's/,//g' >> $wl
-        fi
-    done
-
-    for txt_file in $guest/txt/*.txt
-    do
-        if [ -f $txt_file ]
-        then
-            cat $txt_file >> $wl
-        fi
-    done
-    unix2dos $guest/txt/*.txt
-
+    pushd tests
     psfcheckftml
     for ftml in *.ftml
     do
@@ -579,8 +570,6 @@ then
         done
         popd
     fi
-
-    xhost +local:
 
     exit 0
 fi
@@ -682,6 +671,17 @@ then
         cp -p -v $big/* tests
     fi
     mode=test
+fi
+
+if [ "$mode" == "pdfs" ]
+then
+    pushd tests
+    for ftml in *.ftml
+    do
+        stem=${ftml%.ftml}
+        cp -v $guest/txt/$stem.txt generated/$stem.htxt
+    done
+    popd
 fi
 
 extra=$(echo $priv/tests)
