@@ -9,7 +9,7 @@ sudo rm -rf build
 
 if [ -f meson.build ]
 then
-    meson setup build -Dgraphite2=enabled -Dauto_features=enabled -Ddocs=disabled -Dexperimental_api=true -Dbenchmark=enabled -Dharfrust=enabled -Dbuildtype=release
+    meson setup build -Dgraphite2=enabled -Dauto_features=enabled -Ddocs=disabled -Dexperimental_api=true -Dbenchmark=enabled -Dharfrust=enabled -Dgpu=disabled -Dbuildtype=release
     # meson setup build -Dauto_features=enabled -Dwasm=enabled -Ddocs=disabled
     meson compile -C build
     # ninja -C build

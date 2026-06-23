@@ -147,18 +147,19 @@ fi
 if [ "$mode" == "diff" ]
 then
     pushd results
+    output=$guest/diffenator3
+    mkdir $output
     for ttf in *.ttf
     do
-        diffenator2 diff -fb ../references/$ttf -fa $ttf --user-wordlist $wl -o $guest
+        diffenator3 --html --custom-wordlists $wl --output $output/${ttf%.ttf} ../references/$ttf $ttf
     done
-    diffenator2 proof *.ttf -o $guest
     popd
     if [ -d verify ]
     then
         pushd verify
         for ttf in *.ttf
         do
-            diffenator2 diff -fb ../references/$ttf -fa $ttf --user-wordlist $wl -o $guest
+            diffenator3 --html --custom-wordlists $wl --output $output/${ttf%.ttf} ../references/$ttf $ttf
         done
         popd
     fi
@@ -412,16 +413,14 @@ then
         fi
 
         # check STAT table
-        for dir in gr_ttf s{f,m}_ttf
+        for dir in gr_ttf s{f,m}_ttf results/variable
         do
             for ttf in $dir/*.ttf
             do
                 ttx -t STAT $ttf
             done
-            echo "comparing gr_ttf to $dir"
-            diff -r gr_ttf $dir
         done
-        md5sum ??_ttf/*.ttx | sort
+        md5sum ??_ttf/*.ttx results/variable/*.ttx | sort
 
         rm -f vresults
         ln -s sm_ttf vresults
