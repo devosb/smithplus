@@ -19,11 +19,25 @@ then
     if [ -d $dir ]
     then
         echo "now running rsync $dir"
-        rsync -v -a --delete $dir/ .
+        rsync -v -a --exclude target --delete $dir/ .
     elif [ -f wscript ]
     then
         # get host
         rsync -a -v $HOME/guest/knuth/source $PWD
+        rsync -a -v --exclude source/productsite $HOME/guest/adobe/documentation $PWD
+    elif [ -d references ]
+    then
+        ref=$PWD/references
+        pushd $HOME/guest/adobe
+        for ttf in *.ttf
+        do
+            if [ -f $ttf ]
+            then
+                rsync -v -a -R $ttf $ref
+            fi
+        done
+        popd
+        ls -l -t references/*.ttf
     elif [ $HOSTNAME = "knuth" ]
     then
         # get guest

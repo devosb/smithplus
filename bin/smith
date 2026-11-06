@@ -1,3 +1,0 @@
-#!/bin/bash
-
-smith-flow "$@"

@@ -17,8 +17,14 @@ then
     bash $upgrade
 elif [ -f pyproject.toml -o -f setup.py ]
 then
-    python3 -m pip install --user -e .
-    # vn python -m pip install -e .
+    if [ ! -x /snap/bin/uv ]
+    then
+        echo "installing with pip (/usr/bin/pip)..."
+        python3 -m pip install --user -e .
+    else
+        echo "installing with uv..."
+        uv pip install -e .
+    fi
 elif [ -f wscript ]
 then
     # put host

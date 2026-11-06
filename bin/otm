@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 export LD_LIBRARY_PATH=$HOME/src/icu/source/lib
 OTM_89 "$@"

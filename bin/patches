@@ -1,0 +1,34 @@
+#!/bin/sh
+
+umask 022
+
+if [ -x /usr/bin/snap ]
+then
+    sudo snap refresh
+fi
+if [ -x /usr/bin/flatpak ]
+then
+    flatpak update -y
+fi
+if [ -x /usr/bin/freshclam ]
+then
+    sudo freshclam
+fi
+
+echo -n "Microcode: "
+cat /sys/devices/system/cpu/cpu0/microcode/version
+head /sys/devices/system/cpu/vulnerabilities/*
+uname -a
+echo -n "Display: "
+echo $XDG_SESSION_TYPE
+
+sudo apt-get update
+sudo apt-get dist-upgrade -y
+sudo apt-get autoremove -y
+ret=$(which hwe-support-status)
+if [ $? = 1 ]
+then
+    echo "hwe-support-status not installed"
+else
+    hwe-support-status --verbose
+fi

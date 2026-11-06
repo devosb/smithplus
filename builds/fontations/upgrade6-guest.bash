@@ -1,2 +1,1 @@
-cargo install --path klippa
-cargo install --path otexplorer
+cargo install --path skera

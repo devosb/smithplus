@@ -1,1 +1,1 @@
-git clone git@github.com:silnrsi/font-arab-tools.git arabtools
+git clone git@github.com:silnrsi/font-arabic.git arabtools

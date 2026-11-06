@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/bin/sh
 
 # run checks
 fontbakery check-profile silfont.fbtests.profile "$@" --json fb.json -q
 grep FontBakeryCheck fb.json | cut -d\: -f2 | sed 's/>//g' | sort > fb.txt
 for mode in add sub
 do
-    fontspector -q -p ../silfonts-$mode.toml --json fs-$mode.json "$@"
+    fontspector -q -p silfonts-$mode.toml --json fs-$mode.json --plugin microsoft-fontspectorplugin,adobe-fontspectorplugin,silfonts-fontspectorplugin "$@"
     grep check_id fs-$mode.json | cut -d\: -f2 | sed 's/ "/"/g' | sort > fs-$mode.txt
 done
 

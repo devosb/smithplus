@@ -1,0 +1,15 @@
+#!/bin/sh
+
+bwrap \
+  --die-with-parent \
+  --new-session \
+  --unshare-pid \
+  --ro-bind / / \
+  --proc /proc \
+  --dev /dev \
+  --tmpfs /tmp \
+  --tmpfs /var/tmp \
+  --bind $HOME $HOME \
+  --bind /dev/shm /dev/shm \
+  --bind /mnt /mnt \
+  -- "$@"

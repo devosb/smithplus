@@ -29,4 +29,4 @@ else
 fi
 
 sudo ldconfig
-rustup default stable
+# rustup default stable

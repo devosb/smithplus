@@ -2,8 +2,14 @@
 
 if [ -z "$2" ]
 then
-    instance=apple
-    mode=$1
+    if [ -z "$CONTAINER" ]
+    then
+        echo "need to specify a container"
+        exit 1
+    else
+        instance=$CONTAINER
+        mode=$1
+    fi
 else
     instance=$1
     mode=$2
@@ -11,11 +17,13 @@ fi
 
 case $mode in
 start)
-    xhost +local:
     sudo lxc start $instance
     ;;
 stop)
     sudo lxc stop $instance
+    ;;
+ssh)
+    ssh $instance
     ;;
 login)
     sudo lxc exec $instance -- sudo --user ubuntu --login

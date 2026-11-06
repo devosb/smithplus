@@ -1,0 +1,8 @@
+#!/bin/sh
+
+ssh-add -l
+if [ $? -gt 0 ]
+then
+    ssh-add $HOME/.ssh/id_ed25519_github
+fi
+/snap/bin/gitkraken

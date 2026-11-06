@@ -1,30 +1,34 @@
 #!/bin/bash
 
 umask 022
+if [ ! -x /snap/bin/uv ]
+then
+    echo "Cannot find uv"
+    exit 1
+fi
 sudo echo root
 
-rm -rf $HOME/.local/{bin,lib} $HOME/.cache/pip
-hash -r
+uv clean
+uv venv -c --system-site-packages $HOME/smith
+source $HOME/smith/bin/activate
 
 locations=host
-if [ $HOSTNAME = apple -o $HOSTNAME = emacs ]
+if [ $HOSTNAME = adobe -o $HOSTNAME = eliza ]
 then
     locations=guest
-    pip3 install --upgrade --user pip toml flit packaging wheel tox Pillow urllib3 # setuptools
-    sudo pip3 install --break-system-packages --upgrade ninja meson
-    # vn -i
-    # vn pip install --upgrade pip toml flit packaging wheel setuptools tox Pillow urllib3
-    # vn pip install --upgrade ninja meson
 
-    pip3 install -r $SMITHHOME/requirements.txt
-    # vn pip install -r $SMITHHOME/requirements.txt
+    uv pip install toml flit packaging wheel tox Pillow urllib3 # setuptools
+    sudo uv pip install --exclude-newer "37 days" --system --break-system-packages ninja meson
+
+    uv pip install -r $SMITHHOME/requirements.txt
 elif [ $HOSTNAME = knuth ]
 then
     locations=special
 fi
 
 rustup update
-volta install node@latest
+rustup default nightly
+#volta install node@latest
 
 for level in 1 2 3 4 5 6 7 8 9 ''
 do
@@ -52,12 +56,11 @@ done
 sudo ldconfig
 
 # Show build timestamps
-pushd /run/shm
+pushd /dev/shm
 ls -lt ~/builds/fontvalidator/bin /usr/local/bin/ ~/.cargo/bin
 find /usr/local/lib -name fontforge* -exec ls -l {} \;
 find /usr/local/lib -name psMat* -exec ls -l {} \;
 popd
 
 # Use the latest fontTools
-pip3 show fonttools
-# vn pip show fonttools
+uv pip show fonttools
